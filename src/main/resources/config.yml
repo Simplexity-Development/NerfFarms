@@ -1,0 +1,23 @@
+#yeet
+Nerf Hostiles Only: true
+#if you would like to add any specific mobs to bypass these nerf rules, example of formatting has been commented
+Bypass:
+#  - SKELETON
+#How would you like to modify nerfed drops?
+#Options are [DROPS|EXPERIENCE|BOTH]
+Modification Type: "EXPERIENCE"
+#What types of spawns would you like these rules to apply to?
+#Options are listed here
+#https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html|
+Spawns to modify:
+  - SPAWNER
+#Rules
+Blacklisted blocks mob can stand on:
+  - MAGMA_BLOCK
+  - HONEY_BLOCK
+  - LAVA
+Blacklisted blocks mob can be in:
+  - WATER
+  - LAVA
+  - BUBBLE_COLUMN
+Max distance mob can be from player: 20

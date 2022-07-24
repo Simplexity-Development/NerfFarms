@@ -1,0 +1,4 @@
+name: NerfFarms
+version: '${project.version}'
+main: adhdmc.nerffarms.NerfFarms
+api-version: 1.19
