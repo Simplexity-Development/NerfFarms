@@ -36,5 +36,7 @@ blacklisted-in:
   - LAVA
   - BUBBLE_COLUMN
 
-#Maximum distance a player can be from a mob to still get drops/xp (must be between 1-120)
+#Require mobs to be actively targeted on a player in order to drop anything (this only works for hostile mobs)
+require-targetting: false
+#Maximum distance a mob can be while targetting a player to still get drops/xp (must be between 1-120)
 max-mob-distance: 15

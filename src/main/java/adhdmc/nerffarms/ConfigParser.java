@@ -2,10 +2,9 @@ package adhdmc.nerffarms;
 
 import adhdmc.nerffarms.Commands.ReloadCommand;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +17,32 @@ public class ConfigParser {
     public static final ArrayList<CreatureSpawnEvent.SpawnReason> spawnReasonList = new ArrayList<>();
     public static String modType = null;
     public static int maxDistance = 0;
+    public static int errorCount = 0;
+    public static boolean onlyNerfHostiles = true;
+    public static boolean requireTargetting = false;
 
-    public static void checkStandMaterials(List<String> list){
+    public static void validateConfig(){
+        //you're doing the best you can, config.
+        //clear any set stuff.
         standOnBlacklist.clear();
-        for (String type : list)
+        insideBlacklist.clear();
+        bypassList.clear();
+        spawnReasonList.clear();
+        modType = null;
+        maxDistance = 0;
+        errorCount = 0;
+        onlyNerfHostiles = true;
+        requireTargetting = false;
+        FileConfiguration config = NerfFarms.plugin.getConfig();
+        List<String> standStringList = config.getStringList("blacklisted-below");
+        List<String> inStringList = config.getStringList("blacklisted-in");
+        List<String> bypassStringList = config.getStringList("bypass");
+        List<String> spawnReasonStringList = config.getStringList("spawn-types");
+        String modificationTypeString = config.getString("modification-type");
+        int maxDistanceInt = config.getInt("max-mob-distance");
+        boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
+        boolean requireTargettingBoolean = config.getBoolean("require-targetting");
+        for (String type : standStringList)
         {
             Material materialType = Material.matchMaterial(type);
             if (materialType != null && materialType.isBlock())
@@ -32,11 +53,7 @@ public class ConfigParser {
                 ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
             }
         }
-    }
-
-    public static void checkInsideMaterials(List<String> list){
-        insideBlacklist.clear();
-        for (String type : list)
+        for (String type : inStringList)
         {
             Material materialType = Material.matchMaterial(type);
             if (materialType != null && materialType.isBlock())
@@ -45,21 +62,16 @@ public class ConfigParser {
             } else {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
                 ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
-                return;
             }
         }
-    }
-
-    public static void checkEntityList(List<String> list){
-        bypassList.clear();
-        for (String type : list)
+        for (String type : bypassStringList)
         {
             if (type == null || type.equalsIgnoreCase("")) return;
             try {EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
                 ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
-                return;
+                break;
             }
             EntityType entityType  = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             if (entityType.isAlive())
@@ -70,41 +82,32 @@ public class ConfigParser {
                 ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
             }
         }
-    }
-
-    public static void checkSpawnReason(List<String> list){
-        spawnReasonList.clear();
-        for (String type : list)
+        for (String type : spawnReasonStringList)
         {
             try {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
                     } catch (IllegalArgumentException e) {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason. Please check that you have entered this correctly.");
                 ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
-                return;
+                continue;
             }
             spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
         }
-    }
-
-    public static void checkModificationType(String s){
-        modType = "";
-        if (s == null || s.equalsIgnoreCase("") || (!(s.equalsIgnoreCase("exp") || s.equalsIgnoreCase("drops") || s.equalsIgnoreCase("both")))){
-            NerfFarms.plugin.getLogger().severe(s + " is not a valid modification type. Plugin will not function properly until this is fixed.");
+        if (modificationTypeString == null || modificationTypeString.equalsIgnoreCase("") || (!(modificationTypeString.equalsIgnoreCase("exp") || modificationTypeString.equalsIgnoreCase("drops") || modificationTypeString.equalsIgnoreCase("both")))){
+            NerfFarms.plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
+            modType = "";
             ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
-            return;
+        } else {
+        modType = modificationTypeString;
         }
-        modType = s;
-    }
-
-    public static void checkDistance(int distance){
-        maxDistance = 0;
-        if (!(distance>1 && distance<120)){
+        if (!(maxDistanceInt>1 && maxDistanceInt<120)){
             NerfFarms.plugin.getLogger().warning("Max player distance must be between 1 and 120, setting distance to 20");
             ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
             maxDistance = 20;
-            return;
+        } else {
+        maxDistance = maxDistanceInt;
         }
-        maxDistance = distance;
+        onlyNerfHostiles = nerfHostilesBoolean;
+        requireTargetting = requireTargettingBoolean;
     }
 }

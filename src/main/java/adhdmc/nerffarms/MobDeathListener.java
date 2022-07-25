@@ -11,16 +11,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 public class MobDeathListener implements Listener {
-    FileConfiguration config = NerfFarms.plugin.getConfig();
 
     @EventHandler
     public void onMobDeath(EntityDeathEvent deathEvent){
-        if (!(deathEvent.getEntity() instanceof Mob mob)) return;
-        if (config.getBoolean("only-nerf-hostiles") && !(deathEvent.getEntity() instanceof Monster)) return;
-        if (!ConfigParser.spawnReasonList.contains(deathEvent.getEntity().getEntitySpawnReason())) return;
-        if (!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(deathEvent.getEntity().getType())) return;
-        Location mobLocation = deathEvent.getEntity().getLocation();
-        Location mobStandingOnLocation = deathEvent.getEntity().getLocation().subtract(0, 1, 0);
+        Entity deadMob = deathEvent.getEntity();
+        if (!(deadMob instanceof Mob mob)) return;
+        if (ConfigParser.onlyNerfHostiles && !(deadMob instanceof Monster)) return;
+        if (!ConfigParser.spawnReasonList.contains(deadMob.getEntitySpawnReason())) return;
+        if (!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(deadMob.getType())) return;
+        Location mobLocation = deadMob.getLocation();
+        Location mobStandingOnLocation = deadMob.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
         Material entityStandingIn = mobLocation.getBlock().getType();
         Entity targetedEntity = deathEvent.getEntity().getTargetEntity(ConfigParser.maxDistance, false);
@@ -30,7 +30,7 @@ public class MobDeathListener implements Listener {
             clearDrops(deathEvent);
             return;
         }
-        if(targetedEntity == null || targetedEntity != killer){
+        if(deadMob instanceof Monster && ConfigParser.requireTargetting && (targetedEntity == null || targetedEntity != killer)){
             clearDrops(deathEvent);
             return;
         }
