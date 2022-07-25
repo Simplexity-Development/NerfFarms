@@ -1,23 +1,40 @@
-#yeet
-Nerf Hostiles Only: true
-#if you would like to add any specific mobs to bypass these nerf rules, example of formatting has been commented
-Bypass:
-#  - SKELETON
+#Nerf Farms Plugin
+#This plugin is intended to allow server owners to have more control over what types of mob farms their players can use.
+#For the purposes of this plugin, these rules will, by default, apply to mobs not killed by a player/player's pet. (Fall damage, crushing, drowning)
+#Additional config options are listed below.
+#References:
+#Entities: https://jd.papermc.io/paper/1.19/org/bukkit/entity/package-summary.html
+#Materials/Blocks: https://jd.papermc.io/paper/1.19/org/bukkit/Material.html
+#Spawn Reasons: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html|
+
+#Should the plugin only apply these rules to hostile mobs?
+only-nerf-hostiles: true
+
+#are there any specific mobs that should bypass these rules?
+bypass:
+  - SILVERFISH
+
 #How would you like to modify nerfed drops?
-#Options are [DROPS|EXPERIENCE|BOTH]
-Modification Type: "EXPERIENCE"
+#Options are [DROPS|EXP|BOTH]
+#'Drops' will remove all drops on nerfed kills, 'exp' will remove all experience on nerfed kills, and 'both' will remove both
+modification-type: "EXP"
+
 #What types of spawns would you like these rules to apply to?
-#Options are listed here
-#https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html|
-Spawns to modify:
+spawn-types:
   - SPAWNER
-#Rules
-Blacklisted blocks mob can stand on:
+  - NATURAL
+
+#Blocks that a mob should be nerfed, if it dies on top of
+blacklisted-below:
   - MAGMA_BLOCK
   - HONEY_BLOCK
   - LAVA
-Blacklisted blocks mob can be in:
+
+#Blocks that a mob should be nerfed, if it dies inside of
+blacklisted-in:
   - WATER
   - LAVA
   - BUBBLE_COLUMN
-Max distance mob can be from player: 20
+
+#Maximum distance a player can be from a mob to still get drops/xp (must be between 1-120)
+max-mob-distance: 15

@@ -1,5 +1,7 @@
 package adhdmc.nerffarms;
 
+import adhdmc.nerffarms.Commands.CommandHandler;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -11,25 +13,33 @@ import java.util.List;
 
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
+    public final MiniMessage miniMessage = MiniMessage.miniMessage();
+    public final double version = 0.0;
 
     @Override
     public void onEnable() {
         plugin = this;
-        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         configDefaults();
+        ConfigParser.checkInsideMaterials(getConfig().getStringList("blacklisted-in"));
+        ConfigParser.checkStandMaterials(getConfig().getStringList("blacklisted-below"));
+        ConfigParser.checkEntityList(getConfig().getStringList("bypass"));
+        ConfigParser.checkSpawnReason(getConfig().getStringList("spawn-types"));
+        ConfigParser.checkModificationType(getConfig().getString("modification-type"));
+        ConfigParser.checkDistance(getConfig().getInt("max-mob-distance"));
+        CommandHandler.registerCommands();
         this.saveDefaultConfig();
+        this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        this.getCommand("nerffarms").setExecutor(new CommandHandler());
     }
 
     private void configDefaults() {
         FileConfiguration config = getConfig();
-        this.saveDefaultConfig();
-        config.addDefault("Nerf Hostiles Only", true);
-        config.addDefault("Bypass", List.of(""));
-        config.addDefault("Modification Type", "EXPERIENCE");
-        config.addDefault("Spawns to modify", List.of("SPAWNER"));
-        config.addDefault("Nerf non-player kills", false);
-        config.addDefault("Blacklisted blocks mob can stand on", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
-        config.addDefault("Blacklisted blocks mob can be in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
-        config.addDefault("Max distance mob can be from player", 20);
+        config.addDefault("only-nerf-hostiles", true);
+        config.addDefault("bypass", List.of(""));
+        config.addDefault("modification-type", "EXP");
+        config.addDefault("spawn-types", List.of("SPAWNER", "NATURAL"));
+        config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
+        config.addDefault("blacklisted-in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
+        config.addDefault("max-mob-distance", 15);
     }
 }
