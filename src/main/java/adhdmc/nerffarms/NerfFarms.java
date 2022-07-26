@@ -11,7 +11,7 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final double version = 0.2;
+    public final double version = 0.3;
 
     @Override
     public void onEnable() {
@@ -29,10 +29,11 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("only-nerf-hostiles", true);
         config.addDefault("bypass", List.of(""));
         config.addDefault("modification-type", "EXP");
-        config.addDefault("spawn-types", List.of("SPAWNER", "NATURAL"));
+        config.addDefault("spawn-types", List.of("SPAWNER", "NATURAL", "DEFAULT"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
         config.addDefault("require-targetting", false);
+        config.addDefault("debug", false);
         config.addDefault("max-mob-distance", 15);
     }
 }

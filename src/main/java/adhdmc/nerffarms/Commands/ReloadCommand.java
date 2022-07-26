@@ -8,12 +8,13 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
+import static adhdmc.nerffarms.ConfigParser.errorCount;
+
 public class ReloadCommand extends SubCommand {
 
     public ReloadCommand(){
         super("reload", "Reloads NerfFarms Plugin", "/nerffarms reload");
     }
-    public static int errorCount = 0;
 
     @Override
     public void doThing(CommandSender sender, String[] args) {
@@ -22,6 +23,7 @@ public class ReloadCommand extends SubCommand {
             return;
         }
         if (!(sender instanceof Player)|| sender.hasPermission(CommandHandler.commandsPermission)) {
+
             NerfFarms.plugin.reloadConfig();
             NerfFarms.plugin.saveConfig();
             ConfigParser.validateConfig();

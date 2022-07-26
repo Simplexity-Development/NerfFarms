@@ -7,6 +7,9 @@
 #Materials/Blocks: https://jd.papermc.io/paper/1.19/org/bukkit/Material.html
 #Spawn Reasons: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html|
 
+#only change this if asked
+debug: false
+
 #Should the plugin only apply these rules to hostile mobs?
 only-nerf-hostiles: true
 
@@ -23,6 +26,7 @@ modification-type: "EXP"
 spawn-types:
   - SPAWNER
   - NATURAL
+  - DEFAULT
 
 #Blocks that a mob should be nerfed, if it dies on top of
 blacklisted-below:

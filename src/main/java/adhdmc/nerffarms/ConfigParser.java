@@ -1,6 +1,5 @@
 package adhdmc.nerffarms;
 
-import adhdmc.nerffarms.Commands.ReloadCommand;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
@@ -20,6 +19,7 @@ public class ConfigParser {
     public static int errorCount = 0;
     public static boolean onlyNerfHostiles = true;
     public static boolean requireTargetting = false;
+    public static boolean debug = false;
 
     public static void validateConfig(){
         //you're doing the best you can, config.
@@ -33,6 +33,7 @@ public class ConfigParser {
         errorCount = 0;
         onlyNerfHostiles = true;
         requireTargetting = false;
+        debug = false;
         FileConfiguration config = NerfFarms.plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
@@ -42,6 +43,7 @@ public class ConfigParser {
         int maxDistanceInt = config.getInt("max-mob-distance");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
         boolean requireTargettingBoolean = config.getBoolean("require-targetting");
+        boolean debugSetting = config.getBoolean("debug");
         for (String type : standStringList)
         {
             Material materialType = Material.matchMaterial(type);
@@ -50,7 +52,7 @@ public class ConfigParser {
                 standOnBlacklist.add(materialType);
             } else {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to stand on, please choose another.");
-                ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+                errorCount = errorCount + 1;
             }
         }
         for (String type : inStringList)
@@ -61,7 +63,7 @@ public class ConfigParser {
                 insideBlacklist.add(materialType);
             } else {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
-                ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+                errorCount = errorCount + 1;
             }
         }
         for (String type : bypassStringList)
@@ -70,7 +72,7 @@ public class ConfigParser {
             try {EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
-                ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+                errorCount = errorCount + 1;
                 break;
             }
             EntityType entityType  = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
@@ -79,7 +81,7 @@ public class ConfigParser {
                 bypassList.add(entityType);
             } else {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid entity for bypass. Please choose another.");
-                ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+                errorCount = errorCount + 1;
             }
         }
         for (String type : spawnReasonStringList)
@@ -88,7 +90,7 @@ public class ConfigParser {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
                     } catch (IllegalArgumentException e) {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason. Please check that you have entered this correctly.");
-                ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+                errorCount = errorCount + 1;
                 continue;
             }
             spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
@@ -96,18 +98,19 @@ public class ConfigParser {
         if (modificationTypeString == null || modificationTypeString.equalsIgnoreCase("") || (!(modificationTypeString.equalsIgnoreCase("exp") || modificationTypeString.equalsIgnoreCase("drops") || modificationTypeString.equalsIgnoreCase("both")))){
             NerfFarms.plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
             modType = "";
-            ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+            errorCount = errorCount + 1;
         } else {
         modType = modificationTypeString;
         }
         if (!(maxDistanceInt>1 && maxDistanceInt<120)){
             NerfFarms.plugin.getLogger().warning("Max player distance must be between 1 and 120, setting distance to 20");
-            ReloadCommand.errorCount = ReloadCommand.errorCount + 1;
+            errorCount = errorCount + 1;
             maxDistance = 20;
         } else {
         maxDistance = maxDistanceInt;
         }
         onlyNerfHostiles = nerfHostilesBoolean;
         requireTargetting = requireTargettingBoolean;
+        debug = debugSetting;
     }
 }
