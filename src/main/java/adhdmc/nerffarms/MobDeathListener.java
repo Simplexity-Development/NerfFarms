@@ -2,6 +2,7 @@ package adhdmc.nerffarms;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
@@ -9,76 +10,23 @@ import org.bukkit.entity.Monster;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.logging.Logger;
 
 public class MobDeathListener implements Listener {
+    NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
+    byte f = 0;
+    byte t = 1;
 
     @EventHandler
     public void onMobDeath(EntityDeathEvent deathEvent){
-        boolean d = ConfigParser.debug;
-        Logger l  = NerfFarms.plugin.getLogger();
         Entity deadMob = deathEvent.getEntity();
-        if (!(deadMob instanceof Mob mob)) {
-            if (d) {
-                l.info("(!(deadMob instanceof Mob mob)) return;");
-            }
-            return;
-        }
-        if (ConfigParser.onlyNerfHostiles && !(deadMob instanceof Monster)) {
-            if (d) {
-                l.info("ConfigParser.onlyNerfHostiles && !(deadMob instanceof Monster)");
-            }
-            return;
-        }
-        if (!ConfigParser.spawnReasonList.contains(deadMob.getEntitySpawnReason())) {
-            if (d) {
-                l.info("!ConfigParser.spawnReasonList.contains(deadMob.getEntitySpawnReason())");
-            }
-            return;
-        }
-        if (!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(deadMob.getType())) {
-            if (d) {
-                l.info("!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(deadMob.getType())");
-            }
-            return;
-        }
-        Location mobLocation = deadMob.getLocation();
-        Location mobStandingOnLocation = deadMob.getLocation().subtract(0, 1, 0);
-        Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
-        Material entityStandingIn = mobLocation.getBlock().getType();
-        Entity targetedEntity = deathEvent.getEntity().getTargetEntity(ConfigParser.maxDistance, false);
-        Entity killer = deathEvent.getEntity().getKiller();
-
-        if(mob.getKiller() == null){
-            if (d) {
-                l.info("Killer == null, nerfing drops");
-            }
-            clearDrops(deathEvent);
-            return;
-        }
-        if(deadMob instanceof Monster && ConfigParser.requireTargetting && (targetedEntity == null || targetedEntity != killer)){
-            if (d) {
-                l.info("deadMob instanceof Monster && ConfigParser.requireTargetting && (targetedEntity == null || targetedEntity != killer), ");
-                l.info("Killer: " + killer.toString());
-            }
-            clearDrops(deathEvent);
-            return;
-        }
-        if(ConfigParser.standOnBlacklist.contains(entityStandingOn)){
-            if (d) {
-                l.info("ConfigParser.standOnBlacklist.contains(entityStandingOn)");
-            }
-            clearDrops(deathEvent);
-            return;
-        }
-        if(ConfigParser.insideBlacklist.contains(entityStandingIn)){
-            if (d) {
-                l.info("ConfigParser.standOnBlacklist.contains(entityStandingOn)");
-            }
+        PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
+        if (mobPDC.get(nerfMob, PersistentDataType.BYTE) != null && mobPDC.get(nerfMob, PersistentDataType.BYTE).equals(t)){
             clearDrops(deathEvent);
         }
-
     }
     private void clearDrops(EntityDeathEvent e){
         boolean d = ConfigParser.debug;

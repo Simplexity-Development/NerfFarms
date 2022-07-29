@@ -21,6 +21,7 @@ public final class NerfFarms extends JavaPlugin {
         CommandHandler.registerCommands();
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        this.getServer().getPluginManager().registerEvents(new MobDamageListener(), this);
         this.getCommand("nerffarms").setExecutor(new CommandHandler());
     }
 
@@ -32,6 +33,7 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("spawn-types", List.of("SPAWNER", "NATURAL", "DEFAULT"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
+        config.addDefault("whitelisted-damage-types", Arrays.asList("PROJECTILE", "THORNS", "MAGIC", "ENTITY_ATTACK", "ENTITY_SWEEP_ATTACK"));
         config.addDefault("require-targetting", false);
         config.addDefault("debug", false);
         config.addDefault("max-mob-distance", 15);
