@@ -3,7 +3,6 @@ package adhdmc.nerffarms;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,13 +19,13 @@ public class MobDamageListener implements Listener {
     byte t = 1;
 
     @EventHandler
-    public void onMobDamage(EntityDamageByEntityEvent damageEvent){
-        boolean d = ConfigParser.debug;
-        Logger l  = NerfFarms.plugin.getLogger();
+    public void onMobDamage(EntityDamageByEntityEvent damageEvent) {
+        boolean d = ConfigParser.isDebug();
+        Logger l = NerfFarms.plugin.getLogger();
         Entity damagedEntity = damageEvent.getEntity();
-        if (!(damagedEntity instanceof Mob mob)) {
+        if (!(damagedEntity instanceof Mob)) {
             if (d) {
-                l.info("(!(damagedEntity instanceof Mob mob)) return;");
+                l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is not a mob.");
             }
             return;
         }
@@ -36,21 +35,21 @@ public class MobDamageListener implements Listener {
             l.info(String.valueOf((entityHealth - hitDamage)));
             return;
         }
-        if (ConfigParser.onlyNerfHostiles && !(damagedEntity instanceof Monster)) {
+        if (ConfigParser.isNerfHostilesOnly() && !(damagedEntity instanceof Monster)) {
             if (d) {
-                l.info("ConfigParser.onlyNerfHostiles && !(damagedEntity instanceof Monster)");
+                l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is not a Monster and Nerf Hostiles Only is True.");
             }
             return;
         }
-        if (!ConfigParser.spawnReasonList.contains(damagedEntity.getEntitySpawnReason())) {
+        if (!ConfigParser.getSpawnReasonList().contains(damagedEntity.getEntitySpawnReason())) {
             if (d) {
-                l.info("!ConfigParser.spawnReasonList.contains(damagedEntity.getEntitySpawnReason())");
+                l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " spawned from " + damagedEntity.getEntitySpawnReason() + " which isn't nerfed.");
             }
             return;
         }
-        if (!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(damagedEntity.getType())) {
+        if (ConfigParser.getBypassList().contains(damagedEntity.getType())) {
             if (d) {
-                l.info("!ConfigParser.bypassList.isEmpty() && ConfigParser.bypassList.contains(damagedEntity.getType())");
+                l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is on the bypass list as " + damagedEntity.getType());
             }
             return;
         }
@@ -61,30 +60,30 @@ public class MobDamageListener implements Listener {
         EntityDamageEvent.DamageCause damageType = damageEvent.getCause();
         Entity entityDamager = damageEvent.getDamager();
         PersistentDataContainer mobPDC = damagedEntity.getPersistentDataContainer();
-        if (!ConfigParser.damageCauseWhitelist.contains(damageType)) {
+        if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
             if (d) {
-                l.info("!ConfigParser.damageCauseWhitelist.contains(damageEvent.getCause()");
+                l.info("Nerfing " + damagedEntity.getName() + " due to " + damageType);
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
             return;
         }
-        if(!(entityDamager instanceof Player player)){
+        if (!(entityDamager instanceof Player)) {
             if (d) {
-                l.info("Killer was not a player, nerfing");
+                l.info("Nerfing " + damagedEntity.getName() + " because killer is not a player");
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
             return;
         }
-        if(ConfigParser.standOnBlacklist.contains(entityStandingOn)){
+        if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (d) {
-                l.info("ConfigParser.standOnBlacklist.contains(entityStandingOn)");
+                l.info("Nerfing " + damagedEntity.getName() + " since they are standing on " + entityStandingOn);
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
             return;
         }
-        if(ConfigParser.insideBlacklist.contains(entityStandingIn)){
+        if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (d) {
-                l.info("ConfigParser.standOnBlacklist.contains(entityStandingOn)");
+                l.info("Nerfing " + damagedEntity.getName() + " since they are standing in " + entityStandingIn);
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
         }

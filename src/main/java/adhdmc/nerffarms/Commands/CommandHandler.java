@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     public static final String commandsPermission = "nerffarms.commands";
     public static final String noPermission = "<red>You do not have permission to run this command!";
 
-    private static final HashMap<String, SubCommand> subcommandList = new HashMap<String, SubCommand>();
+    private static final HashMap<String, SubCommand> subcommandList = new HashMap<>();
 
     public static void registerCommands() {
         CommandHandler.subcommandList.put("help", new HelpCommand());
@@ -28,8 +29,8 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        ArrayList<String> subCommands1 = new ArrayList<String>(Arrays.asList("help", "reload"));
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        ArrayList<String> subCommands1 = new ArrayList<>(Arrays.asList("help", "reload"));
         if (args.length == 1 && sender.hasPermission(commandsPermission)) {
             return subCommands1;
         }
@@ -37,11 +38,12 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(sender instanceof Player && !sender.hasPermission(commandsPermission)) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
+        if (sender instanceof Player && !sender.hasPermission(commandsPermission)) {
             sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize(noPermission));
-            return false;}
-        if (args.length == 0){
+            return false;
+        }
+        if (args.length == 0) {
             sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/illogicalsong/NerfFarms'><green><hover:show_text:'<aqua>Click to visit the GitHub repository'>NerfFarms | Version: <version>\nAuthor: _Rhythmic</hover></click>", Placeholder.unparsed("version", String.valueOf(NerfFarms.plugin.version))));
             return true;
         }

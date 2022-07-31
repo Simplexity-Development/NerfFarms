@@ -8,31 +8,30 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-import static adhdmc.nerffarms.ConfigParser.errorCount;
-
 public class ReloadCommand extends SubCommand {
 
-    public ReloadCommand(){
+    public ReloadCommand() {
         super("reload", "Reloads NerfFarms Plugin", "/nerffarms reload");
     }
 
     @Override
     public void doThing(CommandSender sender, String[] args) {
-        if(sender instanceof Player && !sender.hasPermission(CommandHandler.commandsPermission)){
+        if (sender instanceof Player && !sender.hasPermission(CommandHandler.commandsPermission)) {
             sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize(CommandHandler.noPermission));
             return;
         }
-        if (!(sender instanceof Player)|| sender.hasPermission(CommandHandler.commandsPermission)) {
+        if (!(sender instanceof Player) || sender.hasPermission(CommandHandler.commandsPermission)) {
 
             NerfFarms.plugin.reloadConfig();
             NerfFarms.plugin.saveConfig();
             ConfigParser.validateConfig();
             sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<gold>NerfFarms config has been reloaded!"));
-            if(errorCount > 0){
-                sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<red>Your config had <errors> error(s). Check your console for details.", Placeholder.unparsed("errors", String.valueOf(errorCount))));
+            if (ConfigParser.getErrorCount() > 0) {
+                sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<red>Your config had <errors> error(s). Check your console for details.", Placeholder.unparsed("errors", String.valueOf(ConfigParser.getErrorCount()))));
             }
-            if(ConfigParser.modType.equalsIgnoreCase("")){
-                sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<dark_red>'modification-type' setting in config is invalid. Plugin will not be able to function properly until this is fixed."));
+            if (ConfigParser.getModType() == ConfigParser.ModType.NEITHER) {
+                sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<red>Your config does not modify mob drops or exp, this can be due to an error with the modification-type setting or it was set to neither!"));
+                sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<gold>This plugin will do nothing in this state."));
             }
         }
     }
