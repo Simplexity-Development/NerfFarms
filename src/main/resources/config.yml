@@ -5,7 +5,7 @@
 #References:
 #Entities: https://jd.papermc.io/paper/1.19/org/bukkit/entity/package-summary.html
 #Materials/Blocks: https://jd.papermc.io/paper/1.19/org/bukkit/Material.html
-#Spawn Reasons: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html|
+#Spawn Reasons: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
 #Damage Types: https://purpurmc.org/javadoc/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
 
 #only change this if asked
