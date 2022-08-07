@@ -17,9 +17,11 @@ public class ConfigParser {
     private static final HashSet<EntityType> bypassList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> damageCauseWhitelist = new HashSet<>();
+    private static final HashSet<EntityDamageEvent.DamageCause> environmentalDamage = new HashSet<>();
     private static ModType modType = ModType.NEITHER;
     private static int maxDistance = 0;
     private static int errorCount = 0;
+    private static int percentFromEnvironment = 100;
     private static boolean nerfHostilesOnly = true;
     private static boolean requireTargeting = false;
     private static boolean debug = false;
@@ -44,8 +46,10 @@ public class ConfigParser {
         List<String> bypassStringList = config.getStringList("bypass");
         List<String> spawnReasonStringList = config.getStringList("spawn-types");
         List<String> damageWhitelist = config.getStringList("whitelisted-damage-types");
+        List<String> environmentalDamageList = config.getStringList("environmental-damage-types");
         String modificationTypeString = config.getString("modification-type");
         int maxDistanceInt = config.getInt("max-mob-distance");
+        int percentFromEnvironmentInt = config.getInt("percent-from-environment");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
         boolean requireTargetingBoolean = config.getBoolean("require-targetting");
         boolean debugSetting = config.getBoolean("debug");
@@ -115,6 +119,18 @@ public class ConfigParser {
             damageCauseWhitelist.add(EntityDamageEvent.DamageCause.valueOf(type));
         }
 
+        // Generate Environmental Causes
+        for (String type : environmentalDamageList) {
+            try {
+                EntityDamageEvent.DamageCause.valueOf(type);
+            } catch (IllegalArgumentException e) {
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
+                errorCount = errorCount + 1;
+                continue;
+            }
+            environmentalDamage.add(EntityDamageEvent.DamageCause.valueOf(type));
+        }
+
         // Determine modType
         try {
             modType = ModType.valueOf(modificationTypeString);
@@ -130,6 +146,13 @@ public class ConfigParser {
             maxDistance = 20;
         } else {
             maxDistance = maxDistanceInt;
+        }
+
+        // Determine Percent Damage from Environment
+        if (percentFromEnvironmentInt <= 0 || percentFromEnvironmentInt > 100) {
+            NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
+            errorCount = errorCount + 1;
+            percentFromEnvironment = 100;
         }
 
         // Set Booleans
@@ -156,6 +179,10 @@ public class ConfigParser {
 
     public static Set<EntityDamageEvent.DamageCause> getDamageCauseWhitelist() {
         return Collections.unmodifiableSet(damageCauseWhitelist);
+    }
+
+    public static Set<EntityDamageEvent.DamageCause> getEnvironmentalDamageSet() {
+        return Collections.unmodifiableSet(environmentalDamage);
     }
 
     /**
@@ -186,6 +213,10 @@ public class ConfigParser {
 
     public static boolean isDebug() {
         return debug;
+    }
+
+    public static int getPercentFromEnvironment() {
+        return percentFromEnvironment;
     }
 
 

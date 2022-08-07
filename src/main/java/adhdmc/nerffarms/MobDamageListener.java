@@ -3,6 +3,7 @@ package adhdmc.nerffarms;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,10 +12,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
     NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
+    NamespacedKey environmentalDamage = new NamespacedKey(NerfFarms.plugin, "environmentalDamage");
     byte f = 0;
     byte t = 1;
 
@@ -29,10 +33,11 @@ public class MobDamageListener implements Listener {
             }
             return;
         }
-        double entityHealth = ((Mob) damagedEntity).getHealth();
-        double hitDamage = damageEvent.getFinalDamage();
-        if (!(entityHealth - hitDamage <= 0)) {
-            l.info(String.valueOf((entityHealth - hitDamage)));
+        PersistentDataContainer mobPDC = damagedEntity.getPersistentDataContainer();
+        if (mobPDC.has(nerfMob)) {
+            if (d) {
+                l.info(damagedEntity.getName() + " is already nerfed, ignoring...");
+            }
             return;
         }
         if (ConfigParser.isNerfHostilesOnly() && !(damagedEntity instanceof Monster)) {
@@ -53,13 +58,35 @@ public class MobDamageListener implements Listener {
             }
             return;
         }
+        double entityHealth = ((Mob) damagedEntity).getHealth();
+        double hitDamage = damageEvent.getFinalDamage();
+        int percentFromEnvironment = ConfigParser.getPercentFromEnvironment();
+        if (ConfigParser.getEnvironmentalDamageSet().contains(damageEvent.getCause())) {
+            if (d) {
+                l.info("Noting environmental damage of " + hitDamage + " to " + damagedEntity.getName() + ".");
+            }
+            addPDCDamage(mobPDC, hitDamage);
+        }
+        double envDamage = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
+        double maxHealth = Objects.requireNonNull(((Mob) damagedEntity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+        int percentDamage = (int) ((envDamage / maxHealth) * 100);
+        if (percentDamage >= percentFromEnvironment) {
+            if (d) {
+                l.info("Nerfing " + damagedEntity.getName() + " because they took " + percentDamage + "% total damage from the environment.");
+            }
+            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            return;
+        }
+        if (!(entityHealth - hitDamage <= 0)) {
+            l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is not dying.");
+            return;
+        }
         Location mobLocation = damagedEntity.getLocation();
         Location mobStandingOnLocation = damagedEntity.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
         Material entityStandingIn = mobLocation.getBlock().getType();
         EntityDamageEvent.DamageCause damageType = damageEvent.getCause();
         Entity entityDamager = damageEvent.getDamager();
-        PersistentDataContainer mobPDC = damagedEntity.getPersistentDataContainer();
         if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
             if (d) {
                 l.info("Nerfing " + damagedEntity.getName() + " due to " + damageType);
@@ -88,4 +115,11 @@ public class MobDamageListener implements Listener {
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
         }
     }
+
+    private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
+        double damageTotal = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
+        damageTotal += damage;
+        mobPDC.set(environmentalDamage, PersistentDataType.DOUBLE, damageTotal);
+    }
+
 }

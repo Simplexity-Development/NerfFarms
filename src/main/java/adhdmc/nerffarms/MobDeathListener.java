@@ -20,8 +20,7 @@ public class MobDeathListener implements Listener {
     public void onMobDeath(EntityDeathEvent deathEvent) {
         Entity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
-        Byte nerfMobByte = mobPDC.get(nerfMob, PersistentDataType.BYTE);
-        if (nerfMobByte != null && nerfMobByte.equals(t)) {
+        if (mobPDC.has(nerfMob)) {
             clearDrops(deathEvent);
         }
     }

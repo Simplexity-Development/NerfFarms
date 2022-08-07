@@ -37,5 +37,7 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("require-targetting", false);
         config.addDefault("debug", false);
         config.addDefault("max-mob-distance", 15);
+        config.addDefault("environmental-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
+        config.addDefault("percent-from-environment", 75);
     }
 }
