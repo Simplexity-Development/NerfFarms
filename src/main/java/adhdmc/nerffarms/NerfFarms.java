@@ -2,6 +2,9 @@ package adhdmc.nerffarms;
 
 import adhdmc.nerffarms.Commands.CommandHandler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,7 +25,13 @@ public final class NerfFarms extends JavaPlugin {
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         this.getServer().getPluginManager().registerEvents(new MobDamageListener(), this);
-        this.getCommand("nerffarms").setExecutor(new CommandHandler());
+        registerCommand(this.getCommand("nerffarms"), new CommandHandler());
+    }
+
+    private static void registerCommand(PluginCommand command, CommandExecutor executor) {
+        if (command != null) {
+            command.setExecutor(executor);
+        }
     }
 
     private void configDefaults() {

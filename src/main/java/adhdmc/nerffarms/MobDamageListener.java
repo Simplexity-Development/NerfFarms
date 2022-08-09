@@ -1,5 +1,6 @@
 package adhdmc.nerffarms;
 
+import com.destroystokyo.paper.entity.Pathfinder;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,8 +18,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
-    NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
-    NamespacedKey environmentalDamage = new NamespacedKey(NerfFarms.plugin, "environmentalDamage");
+    public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
+    public static final NamespacedKey environmentalDamage = new NamespacedKey(NerfFarms.plugin, "environmentalDamage");
     byte f = 0;
     byte t = 1;
 
@@ -101,6 +102,13 @@ public class MobDamageListener implements Listener {
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
             return;
         }
+        if (!hasPathToPlayer((Player) entityDamager, (Mob) damagedEntity)) {
+            if (d) {
+                l.info("Nerfing " + damagedEntity.getName() + " because they never could reach the player.");
+            }
+            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            return;
+        }
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (d) {
                 l.info("Nerfing " + damagedEntity.getName() + " since they are standing on " + entityStandingOn);
@@ -116,7 +124,17 @@ public class MobDamageListener implements Listener {
         }
     }
 
-    private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
+    private boolean hasPathToPlayer(Player p, Mob m) {
+        Location playerLoc = p.getLocation();
+        Pathfinder.PathResult entityPath = m.getPathfinder().findPath(p);
+        if (entityPath == null) { return false; }
+        Location finalLoc = entityPath.getFinalPoint();
+        if (finalLoc == null) { return false; }
+        // TODO: Make configurable distance.
+        return playerLoc.distance(finalLoc) < 1;
+    }
+
+    private static void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
         double damageTotal = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
         damageTotal += damage;
         mobPDC.set(environmentalDamage, PersistentDataType.DOUBLE, damageTotal);
