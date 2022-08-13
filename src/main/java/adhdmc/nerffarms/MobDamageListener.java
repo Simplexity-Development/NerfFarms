@@ -53,23 +53,35 @@ public class MobDamageListener implements Listener {
         logger.info(damagedEntity.getName() + " has died and not been nerfed.");
     }
 
-    private static boolean hasPathToPlayer(Player p, Mob m) {
+    private boolean hasPathToPlayer(Player p, Mob m) {
         Location playerLoc = p.getLocation();
         Pathfinder.PathResult entityPath = m.getPathfinder().findPath(p);
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (entityPath == null) { return false; }
+
         Location finalLoc = entityPath.getFinalPoint();
         if (finalLoc == null) { return false; }
+
         // TODO: Make configurable distance.
         return playerLoc.distance(finalLoc) < 1;
     }
 
-    private static void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
+    private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
         double damageTotal = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
         damageTotal += damage;
         mobPDC.set(environmentalDamage, PersistentDataType.DOUBLE, damageTotal);
     }
 
-    private static boolean isMob(Entity e) {
+    private boolean isMob(Entity e) {
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (!(e instanceof Mob)) {
             if (debugSetting) {
                 logger.info("Ignoring onMobDamage because " + e.getName() + " is not a mob.");
@@ -79,8 +91,13 @@ public class MobDamageListener implements Listener {
         return true;
     }
 
-    private static boolean isNerfed(Entity e) {
+    private boolean isNerfed(Entity e) {
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (mobPDC.has(nerfMob)) {
             if (debugSetting) {
                 logger.info(e.getName() + " is already nerfed, ignoring...");
@@ -90,7 +107,12 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isHostileNerf(Entity e) {
+    private boolean isHostileNerf(Entity e) {
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (ConfigParser.isNerfHostilesOnly() && !(e instanceof Monster)) {
             if (debugSetting) {
                 logger.info("Ignoring onMobDamage because " + e.getName() + " is not a Monster and Nerf Hostiles Only is True.");
@@ -100,7 +122,12 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isExemptedSpawnReason(Entity e) {
+    private boolean isExemptedSpawnReason(Entity e) {
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (!ConfigParser.getSpawnReasonList().contains(e.getEntitySpawnReason())) {
             if (debugSetting) {
                 logger.info("Ignoring onMobDamage because " + e.getName() + " spawned from " + e.getEntitySpawnReason() + " which isn't nerfed.");
@@ -110,7 +137,12 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isExemptedMob(Entity e) {
+    private boolean isExemptedMob(Entity e) {
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
+
         if (ConfigParser.getBypassList().contains(e.getType())) {
             if (debugSetting) {
                 logger.info("Ignoring onMobDamage because " + e.getName() + " is on the bypass list as " + e.getType());
@@ -120,11 +152,15 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isNerfableEnvironmentally(EntityDamageByEntityEvent event) {
+    private boolean isNerfableEnvironmentally(EntityDamageByEntityEvent event) {
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
         double hitDamage = event.getFinalDamage();
         int percentFromEnvironment = ConfigParser.getPercentFromEnvironment();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (ConfigParser.getEnvironmentalDamageSet().contains(event.getCause())) {
             if (debugSetting) {
@@ -147,10 +183,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isDying(EntityDamageByEntityEvent event) {
+    private boolean isDying(EntityDamageByEntityEvent event) {
         Entity e = event.getEntity();
         double health = ((Mob) e).getHealth();
         double hitDamage = event.getDamage();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (!(health - hitDamage <= 0)) {
             logger.info("Ignoring onMobDamage because " + e.getName() + " is not dying.");
@@ -159,11 +199,15 @@ public class MobDamageListener implements Listener {
         return true;
     }
 
-    private static boolean isNerfableDamageType(EntityDamageByEntityEvent event) {
+    private boolean isNerfableDamageType(EntityDamageByEntityEvent event) {
         Entity e = event.getEntity();
         Location mobLocation = e.getLocation();
         EntityDamageEvent.DamageCause damageType = event.getCause();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
             if (debugSetting) {
@@ -175,10 +219,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isNerfableNonPlayerKill(EntityDamageByEntityEvent event) {
+    private boolean isNerfableNonPlayerKill(EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (!(damager instanceof Player)) {
             if (debugSetting) {
@@ -190,10 +238,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isNerfableBlockedPath(EntityDamageByEntityEvent event) {
+    private boolean isNerfableBlockedPath(EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (!hasPathToPlayer((Player) damager, (Mob) e)) {
             if (debugSetting) {
@@ -205,11 +257,15 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isNerfableAboveBlock(EntityDamageByEntityEvent event) {
+    private boolean isNerfableAboveBlock(EntityDamageByEntityEvent event) {
         Entity e = event.getEntity();
         Location mobStandingOnLocation = e.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (debugSetting) {
@@ -221,10 +277,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private static boolean isNerfableInBlock(EntityDamageByEntityEvent event) {
+    private boolean isNerfableInBlock(EntityDamageByEntityEvent event) {
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
         Material entityStandingIn = e.getLocation().getBlock().getType();
+
+        if (debugSetting) {
+            logger.info("Performing " + this.getClass().getEnclosingMethod().getName() + " on " + e.getName());
+        }
 
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (debugSetting) {
