@@ -52,10 +52,19 @@ public class MobDamageListener implements Listener {
         if (isNerfableNonPlayerKill(damageEvent)) { return; }
         if (isNerfableBlockedPath(damageEvent)) { return; }
 
-        logger.info(damagedEntity.getName() + " has died and not been nerfed.");
+        if (debugSetting) {
+            logger.info(damagedEntity.getName() + " has died and not been nerfed.");
+        }
     }
 
     private boolean hasPathToPlayer(Player p, Mob m) {
+        if (!ConfigParser.isRequireTargeting()) {
+            if (debugSetting) {
+                logger.info("Ignoring pathfinding check on " + m.getName() + " because require targetting is false.");
+            }
+            return false;
+        }
+
         Location playerLoc = p.getLocation();
         Pathfinder.PathResult entityPath = m.getPathfinder().findPath(p);
 
