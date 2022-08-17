@@ -79,7 +79,9 @@ public class MobDamageListener implements Listener {
             return;
         }
         if (!(entityHealth - hitDamage <= 0)) {
-            l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is not dying.");
+            if (d) {
+                l.info("Ignoring onMobDamage because " + damagedEntity.getName() + " is not dying.");
+            }
             return;
         }
         Location mobLocation = damagedEntity.getLocation();

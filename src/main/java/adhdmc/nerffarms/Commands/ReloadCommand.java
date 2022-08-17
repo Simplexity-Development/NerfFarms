@@ -21,7 +21,6 @@ public class ReloadCommand extends SubCommand {
             return;
         }
         if (!(sender instanceof Player) || sender.hasPermission(CommandHandler.commandsPermission)) {
-
             NerfFarms.plugin.reloadConfig();
             NerfFarms.plugin.saveConfig();
             ConfigParser.validateConfig();
