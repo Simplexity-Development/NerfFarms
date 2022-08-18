@@ -44,7 +44,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
             return false;
         }
         if (args.length == 0) {
-            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/illogicalsong/NerfFarms'><green><hover:show_text:'<aqua>Click to visit the GitHub repository'>NerfFarms | Version: <version>\nAuthor: _Rhythmic</hover></click>", Placeholder.unparsed("version", String.valueOf(NerfFarms.plugin.version))));
+            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/illogicalsong/NerfFarms'><green><hover:show_text:'<aqua>Click to visit the GitHub repository'>NerfFarms | Version: <version>\nAuthor: _Rhythmic</hover></click>", Placeholder.unparsed("version", NerfFarms.plugin.version)));
             return true;
         }
         String command = args[0].toLowerCase();
