@@ -1,4 +1,4 @@
-package adhdmc.nerffarms;
+package net.neednot.farmnerf;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ConfigParser {
+public class Config {
     public enum ModType {EXP, DROPS, BOTH, NEITHER}
 
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
@@ -18,15 +18,17 @@ public class ConfigParser {
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> damageCauseWhitelist = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> environmentalDamage = new HashSet<>();
-    private static ModType modType = ModType.NEITHER;
-    private static int maxDistance = 0;
-    private static int errorCount = 0;
-    private static int percentFromEnvironment = 100;
-    private static boolean nerfHostilesOnly = true;
-    private static boolean requireTargeting = false;
-    private static boolean debug = false;
+    private static ModType modType;
+    private static int maxDistance;
+    private static int errorCount;
+    private static float dropRate;
+    private static float xpRate;
+    private static int percentFromEnvironment;
+    private static boolean nerfHostilesOnly;
+    private static boolean requireTargeting;
+    private static boolean debug;
 
-    public static void validateConfig() {
+    public static void validateConfig(FarmNerf plugin) {
         //you're doing the best you can, config.
         //clear any set stuff.
         standOnBlacklist.clear();
@@ -40,7 +42,7 @@ public class ConfigParser {
         nerfHostilesOnly = true;
         requireTargeting = false;
         debug = false;
-        FileConfiguration config = NerfFarms.plugin.getConfig();
+        FileConfiguration config = plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
         List<String> bypassStringList = config.getStringList("bypass");
@@ -50,8 +52,10 @@ public class ConfigParser {
         String modificationTypeString = config.getString("modification-type");
         int maxDistanceInt = config.getInt("max-mob-distance");
         int percentFromEnvironmentInt = config.getInt("percent-from-environment");
+        dropRate = (float) config.getInt("drop-rate")/100;
+        xpRate = (float) config.getInt("xp-rate")/100;
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
-        boolean requireTargetingBoolean = config.getBoolean("require-targetting");
+        boolean requireTargetingBoolean = config.getBoolean("require-targeting");
         boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
@@ -60,7 +64,7 @@ public class ConfigParser {
             if (materialType != null && materialType.isBlock()) {
                 standOnBlacklist.add(materialType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to stand on, please choose another.");
+                plugin.getLogger().warning(type + " is not a valid block for mobs to stand on, please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -71,7 +75,7 @@ public class ConfigParser {
             if (materialType != null && materialType.isBlock()) {
                 insideBlacklist.add(materialType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
+                plugin.getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -80,9 +84,9 @@ public class ConfigParser {
         for (String type : bypassStringList) {
             if (type == null || type.equalsIgnoreCase("")) break;
             try {
-                EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+                EntityType.valueOf(type.toUpperCase(Locale.ENGLISH.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -90,7 +94,7 @@ public class ConfigParser {
             if (entityType.isAlive()) {
                 bypassList.add(entityType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity for bypass. Please choose another.");
+                plugin.getLogger().warning(type + " is not a valid entity for bypass. Please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -100,7 +104,7 @@ public class ConfigParser {
             try {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason. Please check that you have entered this correctly.");
+                plugin.getLogger().warning(type + " is not a valid spawn reason. Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -112,7 +116,7 @@ public class ConfigParser {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
+                plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -124,7 +128,7 @@ public class ConfigParser {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
+                plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -135,25 +139,14 @@ public class ConfigParser {
         try {
             modType = ModType.valueOf(modificationTypeString);
         } catch (IllegalArgumentException e) {
-            NerfFarms.plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
+            plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
             modType = ModType.NEITHER;
         }
 
         // Determine Distance
-        if (!(maxDistanceInt > 1 && maxDistanceInt < 120)) {
-            NerfFarms.plugin.getLogger().warning("Max player distance must be between 1 and 120, setting distance to 20");
-            errorCount = errorCount + 1;
-            maxDistance = 20;
-        } else {
-            maxDistance = maxDistanceInt;
-        }
+        maxDistance = Utils.clamp(maxDistanceInt, 1, 120);
 
-        // Determine Percent Damage from Environment
-        if (percentFromEnvironmentInt <= 0 || percentFromEnvironmentInt > 100) {
-            NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
-            errorCount = errorCount + 1;
-            percentFromEnvironment = 100;
-        }
+        percentFromEnvironment = Utils.clamp(percentFromEnvironmentInt, 1, 100);
 
         // Set Booleans
         nerfHostilesOnly = nerfHostilesBoolean;
@@ -202,12 +195,14 @@ public class ConfigParser {
     public static int getErrorCount() {
         return errorCount;
     }
+    public static float getDropRate() {return dropRate;}
+    public static float getXpRate() {return xpRate;}
 
-    public static boolean isNerfHostilesOnly() {
+    public static boolean nerfHostilesOnly() {
         return nerfHostilesOnly;
     }
 
-    public static boolean isRequireTargeting() {
+    public static boolean requireTargeting() {
         return requireTargeting;
     }
 

@@ -1,7 +1,19 @@
-name: NerfFarms
+name: FarmNerf
 version: '${project.version}'
-main: adhdmc.nerffarms.NerfFarms
+main: net.neednot.farmnerf.FarmNerf
 api-version: 1.19
+authors: [ Need_Not ]
+description: Nerfs farmed mobs
+permissions:
+  farmnerf.debug:
+    description: If debug mode is enabled they will see it
+  farmnerf.bypass:
+    description: Bypasses farming restrictions
+  farmnerf.reload:
+    description: allows you to reload the config
 commands:
-  nerffarms:
-    description: "base command for nerffarms"
+  reload:
+    description: reloads the plugin config
+    usage: /farmnerf reload
+    permission: farmnerf.reload
+
