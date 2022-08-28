@@ -1,5 +1,6 @@
-package adhdmc.nerffarms;
+package adhdmc.nerffarms.config;
 
+import adhdmc.nerffarms.NerfFarms;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;

@@ -1,13 +1,14 @@
-package adhdmc.nerffarms;
+package adhdmc.nerffarms.listener;
 
+import adhdmc.nerffarms.NerfFarms;
+import adhdmc.nerffarms.config.ConfigParser;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
-import adhdmc.nerffarms.ConfigParser.ModType;
+import adhdmc.nerffarms.config.ConfigParser.ModType;
 
 import java.util.logging.Logger;
 

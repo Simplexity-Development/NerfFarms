@@ -1,4 +1,4 @@
-package adhdmc.nerffarms.Commands;
+package adhdmc.nerffarms.command;
 
 import org.bukkit.command.CommandSender;
 

@@ -1,8 +1,10 @@
 package adhdmc.nerffarms;
 
-import adhdmc.nerffarms.Commands.CommandHandler;
+import adhdmc.nerffarms.command.CommandHandler;
+import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.listener.MobDamageListener;
+import adhdmc.nerffarms.listener.MobDeathListener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;

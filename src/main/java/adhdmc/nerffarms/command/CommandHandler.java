@@ -1,4 +1,4 @@
-package adhdmc.nerffarms.Commands;
+package adhdmc.nerffarms.command;
 
 import adhdmc.nerffarms.NerfFarms;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

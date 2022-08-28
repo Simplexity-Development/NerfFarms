@@ -1,5 +1,7 @@
-package adhdmc.nerffarms;
+package adhdmc.nerffarms.listener;
 
+import adhdmc.nerffarms.NerfFarms;
+import adhdmc.nerffarms.config.ConfigParser;
 import com.destroystokyo.paper.entity.Pathfinder;
 import org.bukkit.Location;
 import org.bukkit.Material;
