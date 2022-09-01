@@ -19,8 +19,9 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
-    public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
-    public static final NamespacedKey environmentalDamage = new NamespacedKey(NerfFarms.plugin, "environmentalDamage");
+    public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
+    public static final NamespacedKey disallowedDamage = new NamespacedKey(NerfFarms.plugin, "disallowed-damage");
+    public static final NamespacedKey allowedDamage = new NamespacedKey(NerfFarms.plugin, "allowed-damage");
     private static boolean debugSetting;
     private static Logger logger;
     private static final byte f = 0;
@@ -31,6 +32,7 @@ public class MobDamageListener implements Listener {
         debugSetting = ConfigParser.isDebug();
         logger = NerfFarms.plugin.getLogger();
         Entity damagedEntity = damageEvent.getEntity();
+        PersistentDataContainer entityPDC = damagedEntity.getPersistentDataContainer();
 
         // Ignore Event Checks
         if (!isMob(damagedEntity)) { return; }
@@ -43,7 +45,10 @@ public class MobDamageListener implements Listener {
         if (isNerfableEnvironmentally(damageEvent)) { return; }
 
         // Death Check
-        if (!isDying(damageEvent)) { return; }
+        if (isDying(damageEvent)) {
+            disallowedDamagePercent(entityPDC, damagedEntity);
+            return;
+        }
 
         // On-Death Nerfing Checks
         if (isNerfableDamageType(damageEvent)) { return; }
@@ -53,9 +58,8 @@ public class MobDamageListener implements Listener {
         // On-Death Nerfing Checks (EntityDamagedByEntity)
         if (isNerfableNonPlayerKill(damageEvent)) { return; }
         if (isNerfableBlockedPath(damageEvent)) { return; }
-
         if (debugSetting) {
-            logger.info(damagedEntity.getName() + " has died and not been nerfed.");
+            logger.info(damagedEntity.getName() + " has reached the end of mob damage calculations");
         }
     }
 
@@ -84,9 +88,9 @@ public class MobDamageListener implements Listener {
     }
 
     private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
-        double damageTotal = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
+        double damageTotal = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
         damageTotal += damage;
-        mobPDC.set(environmentalDamage, PersistentDataType.DOUBLE, damageTotal);
+        mobPDC.set(disallowedDamage, PersistentDataType.DOUBLE, damageTotal);
     }
 
     private boolean isMob(Entity e) {
@@ -169,7 +173,7 @@ public class MobDamageListener implements Listener {
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
         double hitDamage = event.getFinalDamage();
-        int percentFromEnvironment = ConfigParser.getPercentFromEnvironment();
+
 
         if (debugSetting) {
             logger.info("Performing isNerfableEnvironmentally on " + e.getName());
@@ -181,19 +185,21 @@ public class MobDamageListener implements Listener {
             }
             addPDCDamage(mobPDC, hitDamage);
         }
+        return false;
+    }
 
-        double envDamage = mobPDC.getOrDefault(environmentalDamage, PersistentDataType.DOUBLE, 0.0);
+    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity e){
+        int maxDisallowedDamage = ConfigParser.getMaxDisallowedDamage();
+        double nerfedDamage = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
         double maxHealth = Objects.requireNonNull(((Mob) e).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
-        int percentDamage = (int) ((envDamage / maxHealth) * 100);
+        int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);
 
-        if (percentDamage >= percentFromEnvironment) {
+        if (percentDamage >= maxDisallowedDamage) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " because they took " + percentDamage + "% total damage from the environment.");
+                logger.info("Nerfing " + e.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
-            return true;
         }
-        return false;
     }
 
     private boolean isDying(EntityDamageEvent event) {
@@ -215,6 +221,7 @@ public class MobDamageListener implements Listener {
     private boolean isNerfableDamageType(EntityDamageEvent event) {
         Entity e = event.getEntity();
         EntityDamageEvent.DamageCause damageType = event.getCause();
+        double damageAmount = event.getDamage();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
 
         if (debugSetting) {
@@ -223,9 +230,9 @@ public class MobDamageListener implements Listener {
 
         if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " due to " + damageType);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damage type is: " + damageType);
             }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            addPDCDamage(mobPDC, damageAmount);
             return true;
         }
         return false;
@@ -241,6 +248,7 @@ public class MobDamageListener implements Listener {
 
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
         Entity e = event.getEntity();
+        double damageAmount = event.getDamage();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
 
         if (debugSetting) {
@@ -249,9 +257,9 @@ public class MobDamageListener implements Listener {
 
         if (!(damager instanceof Player)) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " because killer is not a player");
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damager is not a player");
             }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            addPDCDamage(mobPDC, damageAmount);
             return true;
         }
         return false;
@@ -267,6 +275,7 @@ public class MobDamageListener implements Listener {
 
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
         Entity e = event.getEntity();
+        double damageAmount = event.getDamage();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
 
         if (debugSetting) {
@@ -275,9 +284,10 @@ public class MobDamageListener implements Listener {
 
         if (!hasPathToPlayer((Player) damager, (Mob) e)) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " because they never could reach the player.");
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they never could reach the player.");
+                addPDCDamage(mobPDC, damageAmount);
             }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+
             return true;
         }
         return false;
@@ -287,6 +297,7 @@ public class MobDamageListener implements Listener {
         Entity e = event.getEntity();
         Location mobStandingOnLocation = e.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
+        double damageAmount = event.getDamage();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
 
         if (debugSetting) {
@@ -295,9 +306,9 @@ public class MobDamageListener implements Listener {
 
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " since they are standing on " + entityStandingOn);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing on " + entityStandingOn);
             }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            addPDCDamage(mobPDC, damageAmount);
             return true;
         }
         return false;
@@ -306,6 +317,7 @@ public class MobDamageListener implements Listener {
     private boolean isNerfableInBlock(EntityDamageEvent event) {
         Entity e = event.getEntity();
         PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+        double damageAmount = event.getDamage();
         Material entityStandingIn = e.getLocation().getBlock().getType();
 
         if (debugSetting) {
@@ -314,9 +326,9 @@ public class MobDamageListener implements Listener {
 
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " since they are standing in " + entityStandingIn);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing in " + entityStandingIn);
             }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            addPDCDamage(mobPDC, damageAmount);
             return true;
         }
         return false;
