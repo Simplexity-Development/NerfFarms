@@ -181,7 +181,8 @@ public class MobDamageListener implements Listener {
 
         if (ConfigParser.getEnvironmentalDamageSet().contains(event.getCause())) {
             if (debugSetting) {
-                logger.info("Noting environmental damage of " + hitDamage + " to " + e.getName() + ".");
+                logger.info("Noting environmental damage of " + hitDamage + " to " + e.getName() + "."
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, hitDamage);
         }
@@ -230,7 +231,8 @@ public class MobDamageListener implements Listener {
 
         if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damage type is: " + damageType);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damage type is: " + damageType
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
             return true;
@@ -257,7 +259,8 @@ public class MobDamageListener implements Listener {
 
         if (!(damager instanceof Player)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damager is not a player");
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damager is not a player"
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
             return true;
@@ -284,7 +287,8 @@ public class MobDamageListener implements Listener {
 
         if (!hasPathToPlayer((Player) damager, (Mob) e)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they never could reach the player.");
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they never could reach the player."
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
                 addPDCDamage(mobPDC, damageAmount);
             }
 
@@ -306,7 +310,8 @@ public class MobDamageListener implements Listener {
 
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing on " + entityStandingOn);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing on " + entityStandingOn
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
             return true;
@@ -326,7 +331,8 @@ public class MobDamageListener implements Listener {
 
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing in " + entityStandingIn);
+                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing in " + entityStandingIn
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
             return true;
