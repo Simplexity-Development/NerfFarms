@@ -38,6 +38,7 @@ public class ConfigParser {
         modType = null;
         maxDistance = 0;
         errorCount = 0;
+        maxDisallowedDamage = 100;
         nerfHostilesOnly = true;
         requireTargeting = false;
         debug = false;
@@ -45,14 +46,13 @@ public class ConfigParser {
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
         List<String> bypassStringList = config.getStringList("bypass");
-        List<String> spawnReasonStringList = config.getStringList("spawn-types");
-        List<String> damageWhitelist = config.getStringList("whitelisted-damage-types");
-        List<String> environmentalDamageList = config.getStringList("environmental-damage-types");
+        List<String> spawnReasonStringList = config.getStringList("blacklisted-spawn-types");
+        List<String> environmentalDamageList = config.getStringList("disallowed-damage-types");
         String modificationTypeString = config.getString("modification-type");
-        int maxDistanceInt = config.getInt("max-mob-distance");
-        int maxDisallowedDamage = config.getInt("percent-from-environment");
+        int maxDistanceInt = config.getInt("max-distance");
+        int maxDisallowedDamage = config.getInt("damage-buffer-percent");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
-        boolean requireTargetingBoolean = config.getBoolean("require-targetting");
+        boolean requireTargetingBoolean = config.getBoolean("require-path");
         boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
@@ -106,18 +106,6 @@ public class ConfigParser {
                 continue;
             }
             spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
-        }
-
-        // Generate Damage Causes
-        for (String type : damageWhitelist) {
-            try {
-                EntityDamageEvent.DamageCause.valueOf(type);
-            } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
-                errorCount = errorCount + 1;
-                continue;
-            }
-            damageCauseWhitelist.add(EntityDamageEvent.DamageCause.valueOf(type));
         }
 
         // Generate Environmental Causes
@@ -176,10 +164,6 @@ public class ConfigParser {
 
     public static Set<CreatureSpawnEvent.SpawnReason> getSpawnReasonList() {
         return Collections.unmodifiableSet(spawnReasonList);
-    }
-
-    public static Set<EntityDamageEvent.DamageCause> getDamageCauseWhitelist() {
-        return Collections.unmodifiableSet(damageCauseWhitelist);
     }
 
     public static Set<EntityDamageEvent.DamageCause> getEnvironmentalDamageSet() {

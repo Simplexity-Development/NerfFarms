@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
     public static final NamespacedKey disallowedDamage = new NamespacedKey(NerfFarms.plugin, "disallowed-damage");
-    public static final NamespacedKey allowedDamage = new NamespacedKey(NerfFarms.plugin, "allowed-damage");
     private static boolean debugSetting;
     private static Logger logger;
     private static final byte f = 0;
@@ -51,7 +50,6 @@ public class MobDamageListener implements Listener {
         }
 
         // On-Death Nerfing Checks
-        if (isNerfableDamageType(damageEvent)) { return; }
         if (isNerfableAboveBlock(damageEvent)) { return; }
         if (isNerfableInBlock(damageEvent)) { return; }
 
@@ -83,8 +81,7 @@ public class MobDamageListener implements Listener {
         Location finalLoc = entityPath.getFinalPoint();
         if (finalLoc == null) { return false; }
 
-        // TODO: Make configurable distance.
-        return playerLoc.distance(finalLoc) < 1;
+        return playerLoc.distance(finalLoc) < ConfigParser.getMaxDistance();
     }
 
     private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
@@ -145,7 +142,7 @@ public class MobDamageListener implements Listener {
             logger.info("Performing isExemptedSpawnReason on " + e.getName());
         }
 
-        if (!ConfigParser.getSpawnReasonList().contains(e.getEntitySpawnReason())) {
+        if (ConfigParser.getSpawnReasonList().contains(e.getEntitySpawnReason())) {
             if (debugSetting) {
                 logger.info("Ignoring onMobDamage because " + e.getName() + " spawned from " + e.getEntitySpawnReason() + " which isn't nerfed.");
             }
@@ -217,27 +214,6 @@ public class MobDamageListener implements Listener {
             return false;
         }
         return true;
-    }
-
-    private boolean isNerfableDamageType(EntityDamageEvent event) {
-        Entity e = event.getEntity();
-        EntityDamageEvent.DamageCause damageType = event.getCause();
-        double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
-
-        if (debugSetting) {
-            logger.info("Performing isNerfableDamageType on " + e.getName());
-        }
-
-        if (!ConfigParser.getDamageCauseWhitelist().contains(damageType)) {
-            if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damage type is: " + damageType
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
-            }
-            addPDCDamage(mobPDC, damageAmount);
-            return true;
-        }
-        return false;
     }
 
     private boolean isNerfableNonPlayerKill(EntityDamageEvent event) {
