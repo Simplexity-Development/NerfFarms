@@ -205,7 +205,7 @@ public class MobDamageListener implements Listener {
             logger.info("Performing isDying on " + e.getName());
         }
 
-        if (!(health - hitDamage <= 0)) {
+        if (!(health - hitDamage <= 0) && debugSetting) {
             logger.info("Ignoring onMobDamage because " + e.getName() + " is not dying.");
             return false;
         }
