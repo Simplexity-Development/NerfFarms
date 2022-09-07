@@ -42,9 +42,9 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("only-nerf-hostiles", true);
         config.addDefault("bypass", List.of(""));
         config.addDefault("modification-type", "EXP");
-        config.addDefault("blacklisted-spawn-types", List.of("SPAWNER", "NATURAL", "DEFAULT"));
+        config.addDefault("blacklisted-spawn-types", List.of("CUSTOM"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
-        config.addDefault("blacklisted-in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
+        config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
         config.addDefault("require-path", false);
         config.addDefault("max-distance", 15);
         config.addDefault("disallowed-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
