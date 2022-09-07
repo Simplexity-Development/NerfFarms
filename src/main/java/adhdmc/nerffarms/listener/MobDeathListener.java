@@ -13,7 +13,7 @@ import adhdmc.nerffarms.config.ConfigParser.ModType;
 import java.util.logging.Logger;
 
 public class MobDeathListener implements Listener {
-    NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerfMob");
+    NamespacedKey nerfMob = MobDamageListener.nerfMob;
     byte f = 0;
     byte t = 1;
 

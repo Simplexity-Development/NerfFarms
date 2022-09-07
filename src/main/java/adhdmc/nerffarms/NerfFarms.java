@@ -16,7 +16,7 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final String version = "0.0.6";
+    public final String version = "0.0.7";
 
     @Override
     public void onEnable() {
@@ -38,17 +38,16 @@ public final class NerfFarms extends JavaPlugin {
 
     private void configDefaults() {
         FileConfiguration config = getConfig();
+        config.addDefault("debug", false);
         config.addDefault("only-nerf-hostiles", true);
         config.addDefault("bypass", List.of(""));
         config.addDefault("modification-type", "EXP");
-        config.addDefault("spawn-types", List.of("SPAWNER", "NATURAL", "DEFAULT"));
+        config.addDefault("blacklisted-spawn-types", List.of("CUSTOM"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
-        config.addDefault("blacklisted-in", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
-        config.addDefault("whitelisted-damage-types", Arrays.asList("PROJECTILE", "THORNS", "MAGIC", "ENTITY_ATTACK", "ENTITY_SWEEP_ATTACK"));
-        config.addDefault("require-targetting", false);
-        config.addDefault("debug", false);
-        config.addDefault("max-mob-distance", 15);
-        config.addDefault("environmental-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
-        config.addDefault("percent-from-environment", 75);
+        config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
+        config.addDefault("require-path", false);
+        config.addDefault("max-distance", 15);
+        config.addDefault("disallowed-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
+        config.addDefault("damage-buffer-percent", 75);
     }
 }
