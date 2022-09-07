@@ -22,7 +22,7 @@ public class ConfigParser {
     private static ModType modType = ModType.NEITHER;
     private static int maxDistance = 0;
     private static int errorCount = 0;
-    private static int percentFromEnvironment = 100;
+    private static int maxDisallowedDamage = 100;
     private static boolean nerfHostilesOnly = true;
     private static boolean requireTargeting = false;
     private static boolean debug = false;
@@ -38,6 +38,7 @@ public class ConfigParser {
         modType = null;
         maxDistance = 0;
         errorCount = 0;
+        maxDisallowedDamage = 100;
         nerfHostilesOnly = true;
         requireTargeting = false;
         debug = false;
@@ -45,14 +46,13 @@ public class ConfigParser {
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
         List<String> bypassStringList = config.getStringList("bypass");
-        List<String> spawnReasonStringList = config.getStringList("spawn-types");
-        List<String> damageWhitelist = config.getStringList("whitelisted-damage-types");
-        List<String> environmentalDamageList = config.getStringList("environmental-damage-types");
+        List<String> spawnReasonStringList = config.getStringList("blacklisted-spawn-types");
+        List<String> environmentalDamageList = config.getStringList("disallowed-damage-types");
         String modificationTypeString = config.getString("modification-type");
-        int maxDistanceInt = config.getInt("max-mob-distance");
-        int percentFromEnvironmentInt = config.getInt("percent-from-environment");
+        int maxDistanceInt = config.getInt("max-distance");
+        int maxDisallowedDamage = config.getInt("damage-buffer-percent");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
-        boolean requireTargetingBoolean = config.getBoolean("require-targetting");
+        boolean requireTargetingBoolean = config.getBoolean("require-path");
         boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
@@ -108,18 +108,6 @@ public class ConfigParser {
             spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
         }
 
-        // Generate Damage Causes
-        for (String type : damageWhitelist) {
-            try {
-                EntityDamageEvent.DamageCause.valueOf(type);
-            } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
-                errorCount = errorCount + 1;
-                continue;
-            }
-            damageCauseWhitelist.add(EntityDamageEvent.DamageCause.valueOf(type));
-        }
-
         // Generate Environmental Causes
         for (String type : environmentalDamageList) {
             try {
@@ -150,10 +138,10 @@ public class ConfigParser {
         }
 
         // Determine Percent Damage from Environment
-        if (percentFromEnvironmentInt <= 0 || percentFromEnvironmentInt > 100) {
+        if (maxDisallowedDamage <= 0 || maxDisallowedDamage > 100) {
             NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
             errorCount = errorCount + 1;
-            percentFromEnvironment = 100;
+            maxDisallowedDamage = 100;
         }
 
         // Set Booleans
@@ -176,10 +164,6 @@ public class ConfigParser {
 
     public static Set<CreatureSpawnEvent.SpawnReason> getSpawnReasonList() {
         return Collections.unmodifiableSet(spawnReasonList);
-    }
-
-    public static Set<EntityDamageEvent.DamageCause> getDamageCauseWhitelist() {
-        return Collections.unmodifiableSet(damageCauseWhitelist);
     }
 
     public static Set<EntityDamageEvent.DamageCause> getEnvironmentalDamageSet() {
@@ -216,8 +200,8 @@ public class ConfigParser {
         return debug;
     }
 
-    public static int getPercentFromEnvironment() {
-        return percentFromEnvironment;
+    public static int getMaxDisallowedDamage() {
+        return maxDisallowedDamage;
     }
 
 
