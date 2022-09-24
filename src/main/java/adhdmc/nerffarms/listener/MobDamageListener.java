@@ -2,7 +2,9 @@ package adhdmc.nerffarms.listener;
 
 import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.LocationMath;
 import com.destroystokyo.paper.entity.Pathfinder;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -16,6 +18,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
@@ -41,6 +44,8 @@ public class MobDamageListener implements Listener {
         if (isExemptedMob(damagedEntity)) { return; }
 
         // Pre-Death Nerfing Checks
+        if (isBlockedFromAccess(damageEvent)) { return; }
+        if (hasBlockedLineofSight(damageEvent)) { return; }
         if (isNerfableEnvironmentally(damageEvent)) { return; }
 
         // Death Check
@@ -62,7 +67,7 @@ public class MobDamageListener implements Listener {
     }
 
     private boolean hasPathToPlayer(Player p, Mob m) {
-        if (!ConfigParser.isRequireTargeting()) {
+        if (!ConfigParser.isRequirePath()) {
             if (debugSetting) {
                 logger.info("Ignoring pathfinding check on " + m.getName() + " because require targetting is false.");
             }
@@ -176,7 +181,7 @@ public class MobDamageListener implements Listener {
             logger.info("Performing isNerfableEnvironmentally on " + e.getName());
         }
 
-        if (ConfigParser.getEnvironmentalDamageSet().contains(event.getCause())) {
+        if (ConfigParser.getdisallowedDamageTypesSet().contains(event.getCause())) {
             if (debugSetting) {
                 logger.info("Noting environmental damage of " + hitDamage + " to " + e.getName() + "."
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
@@ -308,6 +313,43 @@ public class MobDamageListener implements Listener {
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (debugSetting) {
                 logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing in " + entityStandingIn
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
+            }
+            addPDCDamage(mobPDC, damageAmount);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isBlockedFromAccess(EntityDamageEvent event){
+        if (!(event instanceof EntityDamageByEntityEvent)) return false;
+        if (!ConfigParser.isRequireNoObstructions()) return true;
+
+        Entity entity = event.getEntity();
+        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+        double damageAmount = event.getDamage();
+        double entityHeight = entity.getHeight();
+        double damagerHeight = damager.getHeight();
+        Location damagerLocation = damager.getLocation().add(0, damagerHeight, 0);
+        Location entityLocation = entity.getLocation().add(0, entityHeight, 0);
+        Set<Location> blocksBetween = LocationMath.getAdjacentTowards(entityLocation, damagerLocation);
+        damager.getWorld().sendMessage(Component.text(blocksBetween.stream().toList().toString()));
+        return false;
+    }
+
+    private boolean hasBlockedLineofSight(EntityDamageEvent event){
+        if (!(event instanceof EntityDamageByEntityEvent)) return false;
+        if (!(event.getEntity() instanceof LivingEntity entity)) return false;
+        if (!ConfigParser.isRequireLineOfSight()) return true;
+
+        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+        double damageAmount = event.getDamage();
+        boolean lineofsight = entity.hasLineOfSight(damager);
+        if (!lineofsight){
+            if (debugSetting) {
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid line of sight to the damager"
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);

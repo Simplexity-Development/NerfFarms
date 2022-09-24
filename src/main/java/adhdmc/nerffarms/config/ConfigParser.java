@@ -17,14 +17,15 @@ public class ConfigParser {
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> bypassList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
-    private static final HashSet<EntityDamageEvent.DamageCause> damageCauseWhitelist = new HashSet<>();
-    private static final HashSet<EntityDamageEvent.DamageCause> environmentalDamage = new HashSet<>();
+    private static final HashSet<EntityDamageEvent.DamageCause> disallowedDamageTypes = new HashSet<>();
     private static ModType modType = ModType.NEITHER;
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxDisallowedDamage = 100;
     private static boolean nerfHostilesOnly = true;
-    private static boolean requireTargeting = false;
+    private static boolean requirePath = false;
+    private static boolean requireLineOfSight = false;
+    private static boolean requireNoObstructions = false;
     private static boolean debug = false;
 
     public static void validateConfig() {
@@ -34,25 +35,29 @@ public class ConfigParser {
         insideBlacklist.clear();
         bypassList.clear();
         spawnReasonList.clear();
-        damageCauseWhitelist.clear();
+        disallowedDamageTypes.clear();
         modType = null;
         maxDistance = 0;
         errorCount = 0;
         maxDisallowedDamage = 100;
         nerfHostilesOnly = true;
-        requireTargeting = false;
+        requirePath = false;
+        requireLineOfSight = false;
+        requireNoObstructions = false;
         debug = false;
         FileConfiguration config = NerfFarms.plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
         List<String> bypassStringList = config.getStringList("bypass");
         List<String> spawnReasonStringList = config.getStringList("blacklisted-spawn-types");
-        List<String> environmentalDamageList = config.getStringList("disallowed-damage-types");
+        List<String> disallowedDamageTypesList = config.getStringList("disallowed-damage-types");
         String modificationTypeString = config.getString("modification-type");
         int maxDistanceInt = config.getInt("max-distance");
-        int maxDisallowedDamage = config.getInt("damage-buffer-percent");
+        int maxDisallowedDamage = config.getInt("max-disallowed-damage-percent");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
-        boolean requireTargetingBoolean = config.getBoolean("require-path");
+        boolean requirePathBoolean = config.getBoolean("require-path");
+        boolean requireLineOfSightBoolean = config.getBoolean("require-line-of-sight");
+        boolean requireNoObstructionsBoolean = config.getBoolean("require-no-obstructions");
         boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
@@ -109,7 +114,7 @@ public class ConfigParser {
         }
 
         // Generate Environmental Causes
-        for (String type : environmentalDamageList) {
+        for (String type : disallowedDamageTypesList) {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
             } catch (IllegalArgumentException e) {
@@ -117,7 +122,7 @@ public class ConfigParser {
                 errorCount = errorCount + 1;
                 continue;
             }
-            environmentalDamage.add(EntityDamageEvent.DamageCause.valueOf(type));
+            disallowedDamageTypes.add(EntityDamageEvent.DamageCause.valueOf(type));
         }
 
         // Determine modType
@@ -146,7 +151,9 @@ public class ConfigParser {
 
         // Set Booleans
         nerfHostilesOnly = nerfHostilesBoolean;
-        requireTargeting = requireTargetingBoolean;
+        requirePath = requirePathBoolean;
+        requireLineOfSight = requireLineOfSightBoolean;
+        requireNoObstructions = requireNoObstructionsBoolean;
         debug = debugSetting;
     }
 
@@ -166,8 +173,8 @@ public class ConfigParser {
         return Collections.unmodifiableSet(spawnReasonList);
     }
 
-    public static Set<EntityDamageEvent.DamageCause> getEnvironmentalDamageSet() {
-        return Collections.unmodifiableSet(environmentalDamage);
+    public static Set<EntityDamageEvent.DamageCause> getdisallowedDamageTypesSet() {
+        return Collections.unmodifiableSet(disallowedDamageTypes);
     }
 
     /**
@@ -192,8 +199,16 @@ public class ConfigParser {
         return nerfHostilesOnly;
     }
 
-    public static boolean isRequireTargeting() {
-        return requireTargeting;
+    public static boolean isRequirePath() {
+        return requirePath;
+    }
+
+    public static boolean isRequireLineOfSight() {
+        return requireLineOfSight;
+    }
+
+    public static boolean isRequireNoObstructions() {
+        return requireNoObstructions;
     }
 
     public static boolean isDebug() {

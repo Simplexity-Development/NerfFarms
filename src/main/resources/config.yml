@@ -22,9 +22,13 @@ modification-type: "EXP"
 
 require-path: false
 
+require-line-of-sight: false
+
+require-no-obstructions: false
+
 max-distance: 15
 
-damage-buffer-percent: 75
+max-disallowed-damage-percent: 75
 
 disallowed-damage-types:
 - FALL

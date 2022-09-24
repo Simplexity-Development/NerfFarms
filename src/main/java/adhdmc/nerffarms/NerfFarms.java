@@ -16,7 +16,7 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final String version = "0.0.7";
+    public final String version = "0.0.8";
 
     @Override
     public void onEnable() {
@@ -46,8 +46,10 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
         config.addDefault("require-path", false);
+        config.addDefault("require-line-of-sight", false);
+        config.addDefault("require-no-obstructions", false);
         config.addDefault("max-distance", 15);
         config.addDefault("disallowed-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
-        config.addDefault("damage-buffer-percent", 75);
+        config.addDefault("max-disallowed-damage-percent", 75);
     }
 }
