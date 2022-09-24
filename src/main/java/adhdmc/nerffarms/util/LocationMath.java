@@ -25,9 +25,9 @@ public class LocationMath {
         double d = Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z, 2));
         Vector v = new Vector(x/d, y/d, z/d);
         locations.add(start.add(v).toBlockLocation());
-        v.rotateAroundY(-45);
+        v.rotateAroundY(-Math.PI/4);
         locations.add(start.add(v).toBlockLocation());
-        v.rotateAroundY(90);
+        v.rotateAroundY(Math.PI/2);
         locations.add(start.add(v).toBlockLocation());
         return locations;
     }
