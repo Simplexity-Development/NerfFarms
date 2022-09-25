@@ -16,7 +16,7 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final String version = "0.0.8";
+    public final String version = "0.0.9";
 
     @Override
     public void onEnable() {
@@ -45,9 +45,11 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("blacklisted-spawn-types", List.of("CUSTOM"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
+        config.addDefault("allow-projectile-damage", true);
         config.addDefault("require-path", false);
         config.addDefault("require-line-of-sight", false);
-        config.addDefault("require-no-obstructions", false);
+        config.addDefault("skeletons-can-damage-creepers", true);
+        config.addDefault("withers-can-damage-entities", true);
         config.addDefault("max-distance", 15);
         config.addDefault("disallowed-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
         config.addDefault("max-disallowed-damage-percent", 75);

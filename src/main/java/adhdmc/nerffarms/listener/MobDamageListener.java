@@ -2,9 +2,7 @@ package adhdmc.nerffarms.listener;
 
 import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
-import adhdmc.nerffarms.util.LocationMath;
 import com.destroystokyo.paper.entity.Pathfinder;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -16,9 +14,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
@@ -37,56 +35,90 @@ public class MobDamageListener implements Listener {
         PersistentDataContainer entityPDC = damagedEntity.getPersistentDataContainer();
 
         // Ignore Event Checks
-        if (!isMob(damagedEntity)) { return; }
-        if (isNerfed(damagedEntity)) { return; }
-        if (isHostileNerf(damagedEntity)) { return; }
-        if (isExemptedSpawnReason(damagedEntity)) { return; }
-        if (isExemptedMob(damagedEntity)) { return; }
-
-        // Pre-Death Nerfing Checks
-        if (isBlockedFromAccess(damageEvent)) { return; }
-        if (hasBlockedLineofSight(damageEvent)) { return; }
-        if (isNerfableEnvironmentally(damageEvent)) { return; }
-
-        // Death Check
-        if (isDying(damageEvent)) {
-            disallowedDamagePercent(entityPDC, damagedEntity);
+        if (!isMob(damagedEntity)) {
             return;
         }
-
-        // On-Death Nerfing Checks
-        if (isNerfableAboveBlock(damageEvent)) { return; }
-        if (isNerfableInBlock(damageEvent)) { return; }
-
-        // On-Death Nerfing Checks (EntityDamagedByEntity)
-        if (isNerfableNonPlayerKill(damageEvent)) { return; }
-        if (isNerfableBlockedPath(damageEvent)) { return; }
+        if (isNerfed(damagedEntity)) {
+            return;
+        }
+        if (isHostileNerf(damagedEntity)) {
+            return;
+        }
+        if (isExemptedSpawnReason(damagedEntity)) {
+            return;
+        }
+        if (isExemptedMob(damagedEntity)) {
+            return;
+        }
+        if (isNerfableNonPlayerDamage(damageEvent)) {
+            return;
+        }
+        if (isProjectileDamage(damageEvent)){
+            return;
+        }
+        if (hasBlockedLineofSight(damageEvent)) {
+            return;
+        }
+        if (canMobMoveToward(damageEvent)) {
+            return;
+        }
+        if (isNerfableEnvironmentally(damageEvent)) {
+            return;
+        }
+        if (isNerfableAboveBlock(damageEvent)) {
+            return;
+        }
+        if (isNerfableInBlock(damageEvent)) {
+            return;
+        }
         if (debugSetting) {
             logger.info(damagedEntity.getName() + " has reached the end of mob damage calculations");
         }
     }
 
-    private boolean hasPathToPlayer(Player p, Mob m) {
-        if (!ConfigParser.isRequirePath()) {
-            if (debugSetting) {
-                logger.info("Ignoring pathfinding check on " + m.getName() + " because require targetting is false.");
-            }
+    private boolean isProjectileDamage(EntityDamageEvent event){
+        if (!(event instanceof EntityDamageByEntityEvent)) {
             return false;
         }
-
-        Location playerLoc = p.getLocation();
-        Pathfinder.PathResult entityPath = m.getPathfinder().findPath(p);
-
-        if (debugSetting) {
-            logger.info("Performing hasPathToPlayer on " + m.getName());
+        if (!(((EntityDamageByEntityEvent) event).getDamager() instanceof Projectile projectile)) {
+            return false;
         }
+        Entity entity = event.getEntity();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+        double hitDamage = event.getFinalDamage();
+        if (!ConfigParser.isAllowProjectileDamage()){
+            if (debugSetting) {
+                logger.info("Arrow damage is not allowed");
+            }
+            addPDCDamage(mobPDC, hitDamage);
+            disallowedDamagePercent(mobPDC, entity);
+            return true;
+        }
+        ProjectileSource shooter = projectile.getShooter();
+        if (!(shooter instanceof Player player)){
+            return false;
+        }
+        Location playerLocation = player.getLocation();
+        Location entityLocation = entity.getLocation();
+        isWithinDistance(event, entityLocation, playerLocation);
+        return false;
+    }
 
-        if (entityPath == null) { return false; }
-
-        Location finalLoc = entityPath.getFinalPoint();
-        if (finalLoc == null) { return false; }
-
-        return playerLoc.distance(finalLoc) < ConfigParser.getMaxDistance();
+    private void isWithinDistance(EntityDamageEvent event, Location entityLoc, Location playerLoc) {
+        if (!(event instanceof EntityDamageByEntityEvent)) {
+            return;
+        }
+        Entity entity = event.getEntity();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+        double distanceBetween = entityLoc.distance(playerLoc);
+        double hitDamage = event.getFinalDamage();
+        if (distanceBetween > ConfigParser.getMaxDistance()) {
+            if (debugSetting) {
+                logger.info(entity.getName() + " is above the max distance from the player");
+            }
+            addPDCDamage(mobPDC, hitDamage);
+            disallowedDamagePercent(mobPDC, entity);
+        }
     }
 
     private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
@@ -172,26 +204,26 @@ public class MobDamageListener implements Listener {
     }
 
     private boolean isNerfableEnvironmentally(EntityDamageEvent event) {
-        Entity e = event.getEntity();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+        Entity entity = event.getEntity();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
         double hitDamage = event.getFinalDamage();
 
-
         if (debugSetting) {
-            logger.info("Performing isNerfableEnvironmentally on " + e.getName());
+            logger.info("Performing isNerfableEnvironmentally on " + entity.getName());
         }
 
         if (ConfigParser.getdisallowedDamageTypesSet().contains(event.getCause())) {
             if (debugSetting) {
-                logger.info("Noting environmental damage of " + hitDamage + " to " + e.getName() + "."
+                logger.info("Noting environmental damage of " + hitDamage + " to " + entity.getName() + "."
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, hitDamage);
+            disallowedDamagePercent(mobPDC, entity);
         }
         return false;
     }
 
-    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity e){
+    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity e) {
         int maxDisallowedDamage = ConfigParser.getMaxDisallowedDamage();
         double nerfedDamage = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
         double maxHealth = Objects.requireNonNull(((Mob) e).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
@@ -205,140 +237,96 @@ public class MobDamageListener implements Listener {
         }
     }
 
-    private boolean isDying(EntityDamageEvent event) {
-        Entity e = event.getEntity();
-        double health = ((Mob) e).getHealth();
-        double hitDamage = event.getDamage();
+    private boolean isNerfableNonPlayerDamage(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        double damageAmount = event.getDamage();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
 
-        if (debugSetting) {
-            logger.info("Performing isDying on " + e.getName());
-        }
-
-        if (!(health - hitDamage <= 0) && debugSetting) {
-            logger.info("Ignoring onMobDamage because " + e.getName() + " is not dying.");
+        if (!(event instanceof EntityDamageByEntityEvent)) {
             return false;
         }
-        return true;
-    }
+        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
 
-    private boolean isNerfableNonPlayerKill(EntityDamageEvent event) {
-        if (!(event instanceof EntityDamageByEntityEvent)) {
+        if (debugSetting) {
+            logger.info("Performing isNerfableNonPlayerKill on " + entity.getName());
+        }
+        if (damager instanceof AbstractSkeleton &&
+                entity instanceof Creeper &&
+                ConfigParser.isSkeletonsDamageCreepers()) {
             if (debugSetting) {
-                logger.info("isNerfableNonPlayerKill is not an EntityDamageByEvent");
+                logger.info("Skipping nerf on " + entity.getName() + "because 'Skeletons can damage creepers' is 'true'");
             }
             return true;
         }
-
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-        Entity e = event.getEntity();
-        double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
-
-        if (debugSetting) {
-            logger.info("Performing isNerfableNonPlayerKill on " + e.getName());
+        if (damager instanceof Wither &&
+                ConfigParser.isWithersDamageEntities()) {
+            if (debugSetting) {
+                logger.info("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'");
+            }
+            return true;
+        }
+        if (damager instanceof Projectile && ConfigParser.isAllowProjectileDamage()){
+            return false;
         }
 
         if (!(damager instanceof Player)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because damager is not a player"
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because " + damager +" is not a player"
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isNerfableBlockedPath(EntityDamageEvent event) {
-        if (!(event instanceof EntityDamageByEntityEvent)) {
-            if (debugSetting) {
-                logger.info("isNerfableBlockedPath is not an EntityDamageByEvent");
-            }
-            return true;
-        }
-
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-        Entity e = event.getEntity();
-        double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
-
-        if (debugSetting) {
-            logger.info("Performing isNerfableBlockedPath on " + e.getName());
-        }
-
-        if (!hasPathToPlayer((Player) damager, (Mob) e)) {
-            if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they never could reach the player."
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
-                addPDCDamage(mobPDC, damageAmount);
-            }
-
+            disallowedDamagePercent(mobPDC, entity);
             return true;
         }
         return false;
     }
 
     private boolean isNerfableAboveBlock(EntityDamageEvent event) {
-        Entity e = event.getEntity();
-        Location mobStandingOnLocation = e.getLocation().subtract(0, 1, 0);
+        Entity entity = event.getEntity();
+        Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
         double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
 
         if (debugSetting) {
-            logger.info("Performing isNerfableAboveBlock on " + e.getName());
+            logger.info("Performing isNerfableAboveBlock on " + entity.getName());
         }
 
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing on " + entityStandingOn
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing on " + entityStandingOn
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
+            disallowedDamagePercent(mobPDC, entity);
             return true;
         }
         return false;
     }
 
     private boolean isNerfableInBlock(EntityDamageEvent event) {
-        Entity e = event.getEntity();
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+        Entity entity = event.getEntity();
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
         double damageAmount = event.getDamage();
-        Material entityStandingIn = e.getLocation().getBlock().getType();
+        Material entityStandingIn = entity.getLocation().getBlock().getType();
 
         if (debugSetting) {
-            logger.info("Performing isNerfableInBlock on " + e.getName());
+            logger.info("Performing isNerfableInBlock on " + entity.getName());
         }
 
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + e.getName() + "'s PDC because they are standing in " + entityStandingIn
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing in " + entityStandingIn
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
+            disallowedDamagePercent(mobPDC, entity);
             return true;
         }
         return false;
     }
 
-    private boolean isBlockedFromAccess(EntityDamageEvent event){
-        if (!(event instanceof EntityDamageByEntityEvent)) return false;
-        if (!ConfigParser.isRequireNoObstructions()) return true;
-
-        Entity entity = event.getEntity();
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double damageAmount = event.getDamage();
-        double entityHeight = entity.getHeight();
-        double damagerHeight = damager.getHeight();
-        Location damagerLocation = damager.getLocation().add(0, damagerHeight, 0);
-        Location entityLocation = entity.getLocation().add(0, entityHeight, 0);
-        Set<Location> blocksBetween = LocationMath.getAdjacentTowards(entityLocation, damagerLocation);
-        damager.getWorld().sendMessage(Component.text(blocksBetween.stream().toList().toString()));
-        return false;
-    }
-
-    private boolean hasBlockedLineofSight(EntityDamageEvent event){
+    private boolean hasBlockedLineofSight(EntityDamageEvent event) {
         if (!(event instanceof EntityDamageByEntityEvent)) return false;
         if (!(event.getEntity() instanceof LivingEntity entity)) return false;
         if (!ConfigParser.isRequireLineOfSight()) return true;
@@ -347,23 +335,39 @@ public class MobDamageListener implements Listener {
         PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
         double damageAmount = event.getDamage();
         boolean lineofsight = entity.hasLineOfSight(damager);
-        if (!lineofsight){
+        if (!lineofsight) {
             if (debugSetting) {
                 logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid line of sight to the damager"
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
+            disallowedDamagePercent(mobPDC, entity);
             return true;
         }
         return false;
     }
 
-    private boolean canMobMoveToward(Entity mob, Entity target) {
-        if (!(mob instanceof Mob)) { return false; }
-        Location targetLoc = target.getLocation();
-        Pathfinder.PathResult entityPath = ((Mob) mob).getPathfinder().findPath(targetLoc);
+    private boolean canMobMoveToward(EntityDamageEvent event) {
+        if (!ConfigParser.isRequirePath()) return false;
+        if (!(event instanceof EntityDamageByEntityEvent)) return false;
+        if (!(event.getEntity() instanceof LivingEntity entity)) return false;
+        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+        Location targetLoc = damager.getLocation();
+        Pathfinder.PathResult entityPath = ((Mob) entity).getPathfinder().findPath(targetLoc);
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+        double damageAmount = event.getDamage();
 
-        if (entityPath == null) { return false; }
+        if (entityPath == null) {
+            return false;
+        }
+        if (!(entityPath.getPoints().size() > 1)) {
+            if (debugSetting) {
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid way to move towards the damager"
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
+            }
+            addPDCDamage(mobPDC, damageAmount);
+            disallowedDamagePercent(mobPDC, entity);
+        }
 
         return (entityPath.getNextPoint() != null);
     }

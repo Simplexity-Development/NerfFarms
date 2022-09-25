@@ -24,7 +24,11 @@ require-path: false
 
 require-line-of-sight: false
 
-require-no-obstructions: false
+allow-projectile-damage: true
+
+skeletons-can-damage-creepers: true
+
+withers-can-damage-entities: true
 
 max-distance: 15
 

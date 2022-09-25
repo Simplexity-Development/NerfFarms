@@ -25,7 +25,9 @@ public class ConfigParser {
     private static boolean nerfHostilesOnly = true;
     private static boolean requirePath = false;
     private static boolean requireLineOfSight = false;
-    private static boolean requireNoObstructions = false;
+    private static boolean allowProjectileDamage = true;
+    private static boolean skeletonsDamageCreepers = true;
+    private static boolean withersDamageEntities = true;
     private static boolean debug = false;
 
     public static void validateConfig() {
@@ -43,7 +45,9 @@ public class ConfigParser {
         nerfHostilesOnly = true;
         requirePath = false;
         requireLineOfSight = false;
-        requireNoObstructions = false;
+        allowProjectileDamage = true;
+        skeletonsDamageCreepers = true;
+        withersDamageEntities = true;
         debug = false;
         FileConfiguration config = NerfFarms.plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
@@ -57,7 +61,9 @@ public class ConfigParser {
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
         boolean requirePathBoolean = config.getBoolean("require-path");
         boolean requireLineOfSightBoolean = config.getBoolean("require-line-of-sight");
-        boolean requireNoObstructionsBoolean = config.getBoolean("require-no-obstructions");
+        boolean allowProjectileDamageBoolean = config.getBoolean("allow-projectile-damage");
+        boolean skeletonsDamageCreepersBoolean = config.getBoolean("skeletons-can-damage-creepers");
+        boolean withersDamageEntitiesBoolean = config.getBoolean("withers-can-damage-entities");
         boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
@@ -153,7 +159,9 @@ public class ConfigParser {
         nerfHostilesOnly = nerfHostilesBoolean;
         requirePath = requirePathBoolean;
         requireLineOfSight = requireLineOfSightBoolean;
-        requireNoObstructions = requireNoObstructionsBoolean;
+        allowProjectileDamage = allowProjectileDamageBoolean;
+        skeletonsDamageCreepers = skeletonsDamageCreepersBoolean;
+        withersDamageEntities = withersDamageEntitiesBoolean;
         debug = debugSetting;
     }
 
@@ -206,9 +214,16 @@ public class ConfigParser {
     public static boolean isRequireLineOfSight() {
         return requireLineOfSight;
     }
+    public static boolean isAllowProjectileDamage() {
+        return allowProjectileDamage;
+    }
 
-    public static boolean isRequireNoObstructions() {
-        return requireNoObstructions;
+    public static boolean isSkeletonsDamageCreepers() {
+        return skeletonsDamageCreepers;
+    }
+
+    public static boolean isWithersDamageEntities() {
+        return withersDamageEntities;
     }
 
     public static boolean isDebug() {
