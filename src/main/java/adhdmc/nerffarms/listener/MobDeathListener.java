@@ -14,33 +14,34 @@ import java.util.logging.Logger;
 
 public class MobDeathListener implements Listener {
     NamespacedKey nerfMob = MobDamageListener.nerfMob;
-    byte f = 0;
-    byte t = 1;
+    boolean debug = ConfigParser.getConfigToggles().get(ConfigParser.ConfigToggles.DEBUG);
+    Logger logger = NerfFarms.plugin.getLogger();
 
     @EventHandler
     public void onMobDeath(EntityDeathEvent deathEvent) {
         Entity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
         if (mobPDC.has(nerfMob)) {
+            if (debug) {
+                logger.info("Running clearDrops");
+            }
             clearDrops(deathEvent);
         }
     }
 
-    private void clearDrops(EntityDeathEvent e) {
-        boolean d = ConfigParser.isDebug();
-        Logger l = NerfFarms.plugin.getLogger();
+    private void clearDrops(EntityDeathEvent entity) {
         ModType configMod = ConfigParser.getModType();
         if (configMod == ModType.EXP || configMod == ModType.BOTH) {
-            if (d) {
-                l.info("configMod Setting clears EXP.");
+            if (debug) {
+                logger.info("configMod Setting clears EXP.");
             }
-            e.setDroppedExp(0);
+            entity.setDroppedExp(0);
         }
         if (configMod == ModType.DROPS || configMod == ModType.BOTH) {
-            if (d) {
-                l.info("configMod Setting clears Drops.");
+            if (debug) {
+                logger.info("configMod Setting clears Drops.");
             }
-            e.getDrops().clear();
+            entity.getDrops().clear();
         }
     }
 }

@@ -12,6 +12,14 @@ import java.util.*;
 
 public class ConfigParser {
     public enum ModType {EXP, DROPS, BOTH, NEITHER}
+    public enum ConfigToggles {
+        //Debug
+        DEBUG,
+        //Bypass toggles
+        ONLY_NERF_HOSTILES, ALLOW_SKELETON_CREEPER_DAMAGE, ALLOW_WITHER_DAMAGE,
+        //Nerfing checks
+        REQUIRE_PATH, REQUIRE_LINE_OF_SIGHT, ALLOW_PROJECTILE_DAMAGE
+        }
 
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
@@ -19,16 +27,10 @@ public class ConfigParser {
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> disallowedDamageTypes = new HashSet<>();
     private static ModType modType = ModType.NEITHER;
+    private static final HashMap<ConfigToggles, Boolean> configToggles = new HashMap<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxDisallowedDamage = 100;
-    private static boolean nerfHostilesOnly = true;
-    private static boolean requirePath = false;
-    private static boolean requireLineOfSight = false;
-    private static boolean allowProjectileDamage = true;
-    private static boolean skeletonsDamageCreepers = true;
-    private static boolean withersDamageEntities = true;
-    private static boolean debug = false;
 
     public static void validateConfig() {
         //you're doing the best you can, config.
@@ -39,16 +41,10 @@ public class ConfigParser {
         spawnReasonList.clear();
         disallowedDamageTypes.clear();
         modType = null;
+        configToggles.clear();
         maxDistance = 0;
         errorCount = 0;
         maxDisallowedDamage = 100;
-        nerfHostilesOnly = true;
-        requirePath = false;
-        requireLineOfSight = false;
-        allowProjectileDamage = true;
-        skeletonsDamageCreepers = true;
-        withersDamageEntities = true;
-        debug = false;
         FileConfiguration config = NerfFarms.plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
@@ -57,7 +53,7 @@ public class ConfigParser {
         List<String> disallowedDamageTypesList = config.getStringList("disallowed-damage-types");
         String modificationTypeString = config.getString("modification-type");
         int maxDistanceInt = config.getInt("max-distance");
-        int maxDisallowedDamage = config.getInt("max-disallowed-damage-percent");
+        int maxDisallowedDamageConfig = config.getInt("max-disallowed-damage-percent");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
         boolean requirePathBoolean = config.getBoolean("require-path");
         boolean requireLineOfSightBoolean = config.getBoolean("require-line-of-sight");
@@ -123,7 +119,7 @@ public class ConfigParser {
         for (String type : disallowedDamageTypesList) {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException exception) {
                 NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
@@ -134,7 +130,7 @@ public class ConfigParser {
         // Determine modType
         try {
             modType = ModType.valueOf(modificationTypeString);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException exception) {
             NerfFarms.plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
             modType = ModType.NEITHER;
         }
@@ -149,20 +145,22 @@ public class ConfigParser {
         }
 
         // Determine Percent Damage from Environment
-        if (maxDisallowedDamage <= 0 || maxDisallowedDamage > 100) {
+        if (maxDisallowedDamageConfig <= 0 || maxDisallowedDamageConfig > 100) {
             NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
             errorCount = errorCount + 1;
             maxDisallowedDamage = 100;
+        } else {
+            maxDisallowedDamage = maxDisallowedDamageConfig;
         }
 
         // Set Booleans
-        nerfHostilesOnly = nerfHostilesBoolean;
-        requirePath = requirePathBoolean;
-        requireLineOfSight = requireLineOfSightBoolean;
-        allowProjectileDamage = allowProjectileDamageBoolean;
-        skeletonsDamageCreepers = skeletonsDamageCreepersBoolean;
-        withersDamageEntities = withersDamageEntitiesBoolean;
-        debug = debugSetting;
+        configToggles.put(ConfigToggles.DEBUG, debugSetting);
+        configToggles.put(ConfigToggles.ONLY_NERF_HOSTILES, nerfHostilesBoolean);
+        configToggles.put(ConfigToggles.ALLOW_SKELETON_CREEPER_DAMAGE, skeletonsDamageCreepersBoolean);
+        configToggles.put(ConfigToggles.ALLOW_WITHER_DAMAGE, withersDamageEntitiesBoolean);
+        configToggles.put(ConfigToggles.REQUIRE_PATH, requirePathBoolean);
+        configToggles.put(ConfigToggles.REQUIRE_LINE_OF_SIGHT, requireLineOfSightBoolean);
+        configToggles.put(ConfigToggles.ALLOW_PROJECTILE_DAMAGE, allowProjectileDamageBoolean);
     }
 
     public static Set<Material> getStandOnBlackList() {
@@ -203,31 +201,8 @@ public class ConfigParser {
         return errorCount;
     }
 
-    public static boolean isNerfHostilesOnly() {
-        return nerfHostilesOnly;
-    }
-
-    public static boolean isRequirePath() {
-        return requirePath;
-    }
-
-    public static boolean isRequireLineOfSight() {
-        return requireLineOfSight;
-    }
-    public static boolean isAllowProjectileDamage() {
-        return allowProjectileDamage;
-    }
-
-    public static boolean isSkeletonsDamageCreepers() {
-        return skeletonsDamageCreepers;
-    }
-
-    public static boolean isWithersDamageEntities() {
-        return withersDamageEntities;
-    }
-
-    public static boolean isDebug() {
-        return debug;
+    public static Map<ConfigToggles, Boolean> getConfigToggles() {
+        return Collections.unmodifiableMap(configToggles);
     }
 
     public static int getMaxDisallowedDamage() {

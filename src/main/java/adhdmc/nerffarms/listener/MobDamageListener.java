@@ -16,24 +16,23 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
     public static final NamespacedKey disallowedDamage = new NamespacedKey(NerfFarms.plugin, "disallowed-damage");
-    private static boolean debugSetting;
+    private static final Map<ConfigParser.ConfigToggles, Boolean> configToggles = ConfigParser.getConfigToggles();
+    boolean debugSetting = false;
     private static Logger logger;
-    private static final byte f = 0;
     private static final byte t = 1;
 
     @EventHandler
     public void onMobDamage(EntityDamageEvent damageEvent) {
-        debugSetting = ConfigParser.isDebug();
+        debugSetting = configToggles.get(ConfigParser.ConfigToggles.DEBUG);
         logger = NerfFarms.plugin.getLogger();
         Entity damagedEntity = damageEvent.getEntity();
-        PersistentDataContainer entityPDC = damagedEntity.getPersistentDataContainer();
-
         // Ignore Event Checks
         if (!isMob(damagedEntity)) {
             return;
@@ -50,6 +49,7 @@ public class MobDamageListener implements Listener {
         if (isExemptedMob(damagedEntity)) {
             return;
         }
+        // Nerfable Damage Checks
         if (isNerfableNonPlayerDamage(damageEvent)) {
             return;
         }
@@ -86,7 +86,7 @@ public class MobDamageListener implements Listener {
         Entity entity = event.getEntity();
         PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
         double hitDamage = event.getFinalDamage();
-        if (!ConfigParser.isAllowProjectileDamage()){
+        if (!configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
             if (debugSetting) {
                 logger.info("Arrow damage is not allowed");
             }
@@ -127,76 +127,76 @@ public class MobDamageListener implements Listener {
         mobPDC.set(disallowedDamage, PersistentDataType.DOUBLE, damageTotal);
     }
 
-    private boolean isMob(Entity e) {
+    private boolean isMob(Entity entity) {
 
         if (debugSetting) {
-            logger.info("Performing isMob on " + e.getName());
+            logger.info("Performing isMob on " + entity.getName());
         }
 
-        if (!(e instanceof Mob)) {
+        if (!(entity instanceof Mob)) {
             if (debugSetting) {
-                logger.info("Ignoring onMobDamage because " + e.getName() + " is not a mob.");
+                logger.info("Ignoring onMobDamage because " + entity.getName() + " is not a mob.");
             }
             return false;
         }
         return true;
     }
 
-    private boolean isNerfed(Entity e) {
-        PersistentDataContainer mobPDC = e.getPersistentDataContainer();
+    private boolean isNerfed(Entity entity) {
+        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
 
         if (debugSetting) {
-            logger.info("Performing isNerfed on " + e.getName());
+            logger.info("Performing isNerfed on " + entity.getName());
         }
 
         if (mobPDC.has(nerfMob)) {
             if (debugSetting) {
-                logger.info(e.getName() + " is already nerfed, ignoring...");
+                logger.info(entity.getName() + " is already nerfed, ignoring...");
             }
             return true;
         }
         return false;
     }
 
-    private boolean isHostileNerf(Entity e) {
+    private boolean isHostileNerf(Entity entity) {
 
         if (debugSetting) {
-            logger.info("Performing isHostileNerf on " + e.getName());
+            logger.info("Performing isHostileNerf on " + entity.getName());
         }
 
-        if (ConfigParser.isNerfHostilesOnly() && !(e instanceof Monster)) {
+        if (configToggles.get(ConfigParser.ConfigToggles.ONLY_NERF_HOSTILES) && !(entity instanceof Monster)) {
             if (debugSetting) {
-                logger.info("Ignoring onMobDamage because " + e.getName() + " is not a Monster and Nerf Hostiles Only is True.");
+                logger.info("Ignoring onMobDamage because " + entity.getName() + " is not a Monster and Nerf Hostiles Only is True.");
             }
             return true;
         }
         return false;
     }
 
-    private boolean isExemptedSpawnReason(Entity e) {
+    private boolean isExemptedSpawnReason(Entity entity) {
 
         if (debugSetting) {
-            logger.info("Performing isExemptedSpawnReason on " + e.getName());
+            logger.info("Performing isExemptedSpawnReason on " + entity.getName());
         }
 
-        if (ConfigParser.getSpawnReasonList().contains(e.getEntitySpawnReason())) {
+        if (ConfigParser.getSpawnReasonList().contains(entity.getEntitySpawnReason())) {
             if (debugSetting) {
-                logger.info("Ignoring onMobDamage because " + e.getName() + " spawned from " + e.getEntitySpawnReason() + " which isn't nerfed.");
+                logger.info("Ignoring onMobDamage because " + entity.getName() + " spawned from " + entity.getEntitySpawnReason() + " which isn't nerfed.");
             }
             return true;
         }
         return false;
     }
 
-    private boolean isExemptedMob(Entity e) {
+    private boolean isExemptedMob(Entity entity) {
 
         if (debugSetting) {
-            logger.info("Performing isExemptedMob on " + e.getName());
+            logger.info("Performing isExemptedMob on " + entity.getName());
         }
 
-        if (ConfigParser.getBypassList().contains(e.getType())) {
+        if (ConfigParser.getBypassList().contains(entity.getType())) {
             if (debugSetting) {
-                logger.info("Ignoring onMobDamage because " + e.getName() + " is on the bypass list as " + e.getType());
+                logger.info("Ignoring onMobDamage because " + entity.getName() + " is on the bypass list as " + entity.getType());
             }
             return true;
         }
@@ -223,15 +223,15 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity e) {
+    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity entity) {
         int maxDisallowedDamage = ConfigParser.getMaxDisallowedDamage();
         double nerfedDamage = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
-        double maxHealth = Objects.requireNonNull(((Mob) e).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+        double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
         int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);
 
         if (percentDamage >= maxDisallowedDamage) {
             if (debugSetting) {
-                logger.info("Nerfing " + e.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
+                logger.info("Nerfing " + entity.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
             }
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
         }
@@ -252,20 +252,20 @@ public class MobDamageListener implements Listener {
         }
         if (damager instanceof AbstractSkeleton &&
                 entity instanceof Creeper &&
-                ConfigParser.isSkeletonsDamageCreepers()) {
+                configToggles.get(ConfigParser.ConfigToggles.ALLOW_SKELETON_CREEPER_DAMAGE)) {
             if (debugSetting) {
                 logger.info("Skipping nerf on " + entity.getName() + "because 'Skeletons can damage creepers' is 'true'");
             }
             return true;
         }
         if (damager instanceof Wither &&
-                ConfigParser.isWithersDamageEntities()) {
+                configToggles.get(ConfigParser.ConfigToggles.ALLOW_WITHER_DAMAGE)) {
             if (debugSetting) {
                 logger.info("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'");
             }
             return true;
         }
-        if (damager instanceof Projectile && ConfigParser.isAllowProjectileDamage()){
+        if (damager instanceof Projectile && configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
             return false;
         }
 
@@ -329,7 +329,7 @@ public class MobDamageListener implements Listener {
     private boolean hasBlockedLineofSight(EntityDamageEvent event) {
         if (!(event instanceof EntityDamageByEntityEvent)) return false;
         if (!(event.getEntity() instanceof LivingEntity entity)) return false;
-        if (!ConfigParser.isRequireLineOfSight()) return true;
+        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return true;
 
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
         PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
@@ -348,7 +348,7 @@ public class MobDamageListener implements Listener {
     }
 
     private boolean canMobMoveToward(EntityDamageEvent event) {
-        if (!ConfigParser.isRequirePath()) return false;
+        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_PATH)) return false;
         if (!(event instanceof EntityDamageByEntityEvent)) return false;
         if (!(event.getEntity() instanceof LivingEntity entity)) return false;
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();

@@ -16,7 +16,7 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final String version = "0.0.9";
+    public final String version = "0.0.10";
 
     @Override
     public void onEnable() {
