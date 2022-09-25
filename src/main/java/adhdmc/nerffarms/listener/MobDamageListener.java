@@ -358,4 +358,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
+    private boolean canMobMoveToward(Entity mob, Entity target) {
+        if (!(mob instanceof Mob)) { return false; }
+        Location targetLoc = target.getLocation();
+        Pathfinder.PathResult entityPath = ((Mob) mob).getPathfinder().findPath(targetLoc);
+
+        if (entityPath == null) { return false; }
+
+        return (entityPath.getNextPoint() != null);
+    }
+
 }
