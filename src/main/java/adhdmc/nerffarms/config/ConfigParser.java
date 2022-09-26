@@ -25,12 +25,12 @@ public class ConfigParser {
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> bypassList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
-    private static final HashSet<EntityDamageEvent.DamageCause> disallowedDamageTypes = new HashSet<>();
+    private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
     private static ModType modType = ModType.NEITHER;
     private static final HashMap<ConfigToggles, Boolean> configToggles = new HashMap<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
-    private static int maxDisallowedDamage = 100;
+    private static int maxBlacklistedDamage = 100;
 
     public static void validateConfig() {
         //you're doing the best you can, config.
@@ -39,21 +39,21 @@ public class ConfigParser {
         insideBlacklist.clear();
         bypassList.clear();
         spawnReasonList.clear();
-        disallowedDamageTypes.clear();
+        blacklistedDamageTypes.clear();
         modType = null;
         configToggles.clear();
         maxDistance = 0;
         errorCount = 0;
-        maxDisallowedDamage = 100;
+        maxBlacklistedDamage = 100;
         FileConfiguration config = NerfFarms.plugin.getConfig();
         List<String> standStringList = config.getStringList("blacklisted-below");
         List<String> inStringList = config.getStringList("blacklisted-in");
         List<String> bypassStringList = config.getStringList("bypass");
-        List<String> spawnReasonStringList = config.getStringList("blacklisted-spawn-types");
-        List<String> disallowedDamageTypesList = config.getStringList("disallowed-damage-types");
+        List<String> spawnReasonStringList = config.getStringList("whitelisted-spawn-types");
+        List<String> blacklistedDamageTypesList = config.getStringList("blacklisted-damage-types");
         String modificationTypeString = config.getString("modification-type");
         int maxDistanceInt = config.getInt("max-distance");
-        int maxDisallowedDamageConfig = config.getInt("max-disallowed-damage-percent");
+        int maxBlacklistedDamageConfig = config.getInt("max-blacklisted-damage-percent");
         boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
         boolean requirePathBoolean = config.getBoolean("require-path");
         boolean requireLineOfSightBoolean = config.getBoolean("require-line-of-sight");
@@ -116,7 +116,7 @@ public class ConfigParser {
         }
 
         // Generate Environmental Causes
-        for (String type : disallowedDamageTypesList) {
+        for (String type : blacklistedDamageTypesList) {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
             } catch (IllegalArgumentException exception) {
@@ -124,7 +124,7 @@ public class ConfigParser {
                 errorCount = errorCount + 1;
                 continue;
             }
-            disallowedDamageTypes.add(EntityDamageEvent.DamageCause.valueOf(type));
+            blacklistedDamageTypes.add(EntityDamageEvent.DamageCause.valueOf(type));
         }
 
         // Determine modType
@@ -145,12 +145,12 @@ public class ConfigParser {
         }
 
         // Determine Percent Damage from Environment
-        if (maxDisallowedDamageConfig <= 0 || maxDisallowedDamageConfig > 100) {
+        if (maxBlacklistedDamageConfig <= 0 || maxBlacklistedDamageConfig > 100) {
             NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
             errorCount = errorCount + 1;
-            maxDisallowedDamage = 100;
+            maxBlacklistedDamage = 100;
         } else {
-            maxDisallowedDamage = maxDisallowedDamageConfig;
+            maxBlacklistedDamage = maxBlacklistedDamageConfig;
         }
 
         // Set Booleans
@@ -179,8 +179,8 @@ public class ConfigParser {
         return Collections.unmodifiableSet(spawnReasonList);
     }
 
-    public static Set<EntityDamageEvent.DamageCause> getdisallowedDamageTypesSet() {
-        return Collections.unmodifiableSet(disallowedDamageTypes);
+    public static Set<EntityDamageEvent.DamageCause> getblacklistedDamageTypesSet() {
+        return Collections.unmodifiableSet(blacklistedDamageTypes);
     }
 
     /**
@@ -205,8 +205,8 @@ public class ConfigParser {
         return Collections.unmodifiableMap(configToggles);
     }
 
-    public static int getMaxDisallowedDamage() {
-        return maxDisallowedDamage;
+    public static int getMaxBlacklistedDamage() {
+        return maxBlacklistedDamage;
     }
 
 
