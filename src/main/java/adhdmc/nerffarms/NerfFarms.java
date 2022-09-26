@@ -5,6 +5,7 @@ import adhdmc.nerffarms.config.ConfigParser;
 import adhdmc.nerffarms.listener.MobDamageListener;
 import adhdmc.nerffarms.listener.MobDeathListener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,9 +22,17 @@ public final class NerfFarms extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+        try {
+            Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
+            Class.forName("com.destroystokyo.paper.entity.Pathfinder");
+        } catch (ClassNotFoundException exception) {
+            this.getLogger().severe("NerfFarms relies on methods in classes not present on your server. Disabling plugin");
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
         configDefaults();
         ConfigParser.validateConfig();
         CommandHandler.registerCommands();
+        Metrics metrics = new Metrics(this, 16509);
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         this.getServer().getPluginManager().registerEvents(new MobDamageListener(), this);
