@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 
 public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
-    public static final NamespacedKey disallowedDamage = new NamespacedKey(NerfFarms.plugin, "disallowed-damage");
+    public static final NamespacedKey blacklistedDamage = new NamespacedKey(NerfFarms.plugin, "blacklisted-damage");
     private static final Map<ConfigParser.ConfigToggles, Boolean> configToggles = ConfigParser.getConfigToggles();
     boolean debugSetting = false;
     private static Logger logger;
@@ -33,11 +33,13 @@ public class MobDamageListener implements Listener {
         debugSetting = configToggles.get(ConfigParser.ConfigToggles.DEBUG);
         logger = NerfFarms.plugin.getLogger();
         Entity damagedEntity = damageEvent.getEntity();
+        PersistentDataContainer mobPDC = damagedEntity.getPersistentDataContainer();
+        double damageAmount = damageEvent.getFinalDamage();
         // Ignore Event Checks
         if (!isMob(damagedEntity)) {
             return;
         }
-        if (isNerfed(damagedEntity)) {
+        if (isNerfed(damagedEntity, mobPDC)) {
             return;
         }
         if (isHostileNerf(damagedEntity)) {
@@ -50,25 +52,27 @@ public class MobDamageListener implements Listener {
             return;
         }
         // Nerfable Damage Checks
-        if (isNerfableNonPlayerDamage(damageEvent)) {
+        if (damageEvent instanceof EntityDamageByEntityEvent damageByEntityEvent){
+            if (checkForNonPlayerDamage(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) {
+                return;
+            }
+            if (checkForProjectileDamage(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)){
+                return;
+            }
+            if (checkForBlockedLineOfSight(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) {
+                return;
+            }
+            if (checkIfMobCanMoveToward(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) {
+                return;
+            }
+        }
+        if (checkForEnvironmentDamage(damageEvent, damagedEntity, mobPDC, damageAmount)) {
             return;
         }
-        if (isProjectileDamage(damageEvent)){
+        if (checkForStandingOnBlacklistedBlock(damageEvent, damagedEntity, mobPDC, damageAmount)) {
             return;
         }
-        if (hasBlockedLineofSight(damageEvent)) {
-            return;
-        }
-        if (canMobMoveToward(damageEvent)) {
-            return;
-        }
-        if (isNerfableEnvironmentally(damageEvent)) {
-            return;
-        }
-        if (isNerfableAboveBlock(damageEvent)) {
-            return;
-        }
-        if (isNerfableInBlock(damageEvent)) {
+        if (checkForStandingInBlacklistedBlock(damageEvent, damagedEntity, mobPDC, damageAmount)) {
             return;
         }
         if (debugSetting) {
@@ -76,55 +80,24 @@ public class MobDamageListener implements Listener {
         }
     }
 
-    private boolean isProjectileDamage(EntityDamageEvent event){
-        if (!(event instanceof EntityDamageByEntityEvent)) {
-            return false;
-        }
-        if (!(((EntityDamageByEntityEvent) event).getDamager() instanceof Projectile projectile)) {
-            return false;
-        }
-        Entity entity = event.getEntity();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double hitDamage = event.getFinalDamage();
-        if (!configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
-            if (debugSetting) {
-                logger.info("Arrow damage is not allowed");
-            }
-            addPDCDamage(mobPDC, hitDamage);
-            disallowedDamagePercent(mobPDC, entity);
-            return true;
-        }
-        ProjectileSource shooter = projectile.getShooter();
-        if (!(shooter instanceof Player player)){
-            return false;
-        }
-        Location playerLocation = player.getLocation();
-        Location entityLocation = entity.getLocation();
-        isWithinDistance(event, entityLocation, playerLocation);
-        return false;
-    }
-
-    private void isWithinDistance(EntityDamageEvent event, Location entityLoc, Location playerLoc) {
-        if (!(event instanceof EntityDamageByEntityEvent)) {
-            return;
-        }
-        Entity entity = event.getEntity();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double distanceBetween = entityLoc.distance(playerLoc);
-        double hitDamage = event.getFinalDamage();
-        if (distanceBetween > ConfigParser.getMaxDistance()) {
-            if (debugSetting) {
-                logger.info(entity.getName() + " is above the max distance from the player");
-            }
-            addPDCDamage(mobPDC, hitDamage);
-            disallowedDamagePercent(mobPDC, entity);
-        }
-    }
-
     private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
-        double damageTotal = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
+        double damageTotal = mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0);
         damageTotal += damage;
-        mobPDC.set(disallowedDamage, PersistentDataType.DOUBLE, damageTotal);
+        mobPDC.set(blacklistedDamage, PersistentDataType.DOUBLE, damageTotal);
+    }
+
+    private void checkIfPassedBlacklistedDamagePercent(PersistentDataContainer mobPDC, Entity entity) {
+        int maxBlacklistedDamage = ConfigParser.getMaxBlacklistedDamage();
+        double nerfedDamage = mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0);
+        double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+        int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);
+
+        if (percentDamage >= maxBlacklistedDamage) {
+            if (debugSetting) {
+                logger.info("Nerfing " + entity.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
+            }
+            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+        }
     }
 
     private boolean isMob(Entity entity) {
@@ -142,8 +115,7 @@ public class MobDamageListener implements Listener {
         return true;
     }
 
-    private boolean isNerfed(Entity entity) {
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+    private boolean isNerfed(Entity entity, PersistentDataContainer mobPDC) {
 
         if (debugSetting) {
             logger.info("Performing isNerfed on " + entity.getName());
@@ -203,49 +175,85 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    private boolean isNerfableEnvironmentally(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double hitDamage = event.getFinalDamage();
+    private boolean checkForEnvironmentDamage(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
 
         if (debugSetting) {
             logger.info("Performing isNerfableEnvironmentally on " + entity.getName());
         }
 
-        if (ConfigParser.getdisallowedDamageTypesSet().contains(event.getCause())) {
+        if (ConfigParser.getblacklistedDamageTypesSet().contains(event.getCause())) {
             if (debugSetting) {
                 logger.info("Noting environmental damage of " + hitDamage + " to " + entity.getName() + "."
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, hitDamage);
-            disallowedDamagePercent(mobPDC, entity);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
         }
         return false;
     }
 
-    private void disallowedDamagePercent(PersistentDataContainer mobPDC, Entity entity) {
-        int maxDisallowedDamage = ConfigParser.getMaxDisallowedDamage();
-        double nerfedDamage = mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0);
-        double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
-        int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);
 
-        if (percentDamage >= maxDisallowedDamage) {
-            if (debugSetting) {
-                logger.info("Nerfing " + entity.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
-            }
-            mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+
+
+    private boolean checkForStandingOnBlacklistedBlock(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
+        Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
+        Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
+
+        if (debugSetting) {
+            logger.info("Performing isNerfableAboveBlock on " + entity.getName());
         }
+
+        if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
+            if (debugSetting) {
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing on " + entityStandingOn
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
+            }
+            addPDCDamage(mobPDC, damageAmount);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
+            return true;
+        }
+        return false;
     }
 
-    private boolean isNerfableNonPlayerDamage(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
+    private boolean checkForStandingInBlacklistedBlock(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
+        Material entityStandingIn = entity.getLocation().getBlock().getType();
 
-        if (!(event instanceof EntityDamageByEntityEvent)) {
-            return false;
+        if (debugSetting) {
+            logger.info("Performing isNerfableInBlock on " + entity.getName());
         }
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+
+        if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
+            if (debugSetting) {
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing in " + entityStandingIn
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
+            }
+            addPDCDamage(mobPDC, damageAmount);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkForBlockedLineOfSight(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
+        if (!(entity instanceof LivingEntity)) return false;
+        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return true;
+        Entity damager = event.getDamager();
+        boolean lineofsight = ((LivingEntity) entity).hasLineOfSight(damager);
+        if (!lineofsight) {
+            if (debugSetting) {
+                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid line of sight to the damager"
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
+            }
+            addPDCDamage(mobPDC, damageAmount);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkForNonPlayerDamage(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
+
+        Entity damager = event.getDamager();
 
         if (debugSetting) {
             logger.info("Performing isNerfableNonPlayerKill on " + entity.getName());
@@ -272,90 +280,21 @@ public class MobDamageListener implements Listener {
         if (!(damager instanceof Player)) {
             if (debugSetting) {
                 logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because " + damager +" is not a player"
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
-            disallowedDamagePercent(mobPDC, entity);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
             return true;
         }
         return false;
     }
 
-    private boolean isNerfableAboveBlock(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
-        Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
-        double damageAmount = event.getDamage();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-
-        if (debugSetting) {
-            logger.info("Performing isNerfableAboveBlock on " + entity.getName());
-        }
-
-        if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
-            if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing on " + entityStandingOn
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
-            }
-            addPDCDamage(mobPDC, damageAmount);
-            disallowedDamagePercent(mobPDC, entity);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isNerfableInBlock(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double damageAmount = event.getDamage();
-        Material entityStandingIn = entity.getLocation().getBlock().getType();
-
-        if (debugSetting) {
-            logger.info("Performing isNerfableInBlock on " + entity.getName());
-        }
-
-        if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
-            if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they are standing in " + entityStandingIn
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
-            }
-            addPDCDamage(mobPDC, damageAmount);
-            disallowedDamagePercent(mobPDC, entity);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean hasBlockedLineofSight(EntityDamageEvent event) {
-        if (!(event instanceof EntityDamageByEntityEvent)) return false;
-        if (!(event.getEntity() instanceof LivingEntity entity)) return false;
-        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return true;
-
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double damageAmount = event.getDamage();
-        boolean lineofsight = entity.hasLineOfSight(damager);
-        if (!lineofsight) {
-            if (debugSetting) {
-                logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid line of sight to the damager"
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
-            }
-            addPDCDamage(mobPDC, damageAmount);
-            disallowedDamagePercent(mobPDC, entity);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean canMobMoveToward(EntityDamageEvent event) {
+    private boolean checkIfMobCanMoveToward(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
         if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_PATH)) return false;
-        if (!(event instanceof EntityDamageByEntityEvent)) return false;
-        if (!(event.getEntity() instanceof LivingEntity entity)) return false;
-        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+        if (!(entity instanceof LivingEntity)) return false;
+        Entity damager = event.getDamager();
         Location targetLoc = damager.getLocation();
         Pathfinder.PathResult entityPath = ((Mob) entity).getPathfinder().findPath(targetLoc);
-        PersistentDataContainer mobPDC = entity.getPersistentDataContainer();
-        double damageAmount = event.getDamage();
 
         if (entityPath == null) {
             return false;
@@ -363,13 +302,47 @@ public class MobDamageListener implements Listener {
         if (!(entityPath.getPoints().size() > 1)) {
             if (debugSetting) {
                 logger.info("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid way to move towards the damager"
-                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(disallowedDamage, PersistentDataType.DOUBLE, 0.0));
+                        + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
             }
             addPDCDamage(mobPDC, damageAmount);
-            disallowedDamagePercent(mobPDC, entity);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
         }
 
         return (entityPath.getNextPoint() != null);
+    }
+
+    private boolean checkForProjectileDamage(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage){
+        if (!(event.getDamager() instanceof Projectile projectile)) {
+            return false;
+        }
+        if (!configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
+            if (debugSetting) {
+                logger.info("Arrow damage is not allowed");
+            }
+            addPDCDamage(mobPDC, hitDamage);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
+            return true;
+        }
+        ProjectileSource shooter = projectile.getShooter();
+        if (!(shooter instanceof Player player)){
+            return false;
+        }
+        Location playerLocation = player.getLocation();
+        Location entityLocation = entity.getLocation();
+        checkForWithinDistance(event, entityLocation, playerLocation, entity, mobPDC);
+        return false;
+    }
+
+    private void checkForWithinDistance(EntityDamageByEntityEvent event, Location entityLoc, Location playerLoc, Entity entity, PersistentDataContainer mobPDC) {
+        double distanceBetween = entityLoc.distance(playerLoc);
+        double hitDamage = event.getFinalDamage();
+        if (distanceBetween > ConfigParser.getMaxDistance()) {
+            if (debugSetting) {
+                logger.info(entity.getName() + " is above the max distance from the player");
+            }
+            addPDCDamage(mobPDC, hitDamage);
+            checkIfPassedBlacklistedDamagePercent(mobPDC, entity);
+        }
     }
 
 }

@@ -11,18 +11,11 @@
 #only change this if asked
 debug: false
 
-only-nerf-hostiles: true
-
-bypass:
-  - SILVERFISH
-
-#[DROPS|EXP|BOTH|NEITHER]
-
-modification-type: "EXP"
-
 require-path: false
 
 require-line-of-sight: false
+
+only-nerf-hostiles: true
 
 allow-projectile-damage: true
 
@@ -30,17 +23,24 @@ skeletons-can-damage-creepers: true
 
 withers-can-damage-entities: true
 
+#[DROPS|EXP|BOTH|NEITHER]
+
+modification-type: "NEITHER"
+
 max-distance: 15
 
-max-disallowed-damage-percent: 75
+max-blacklisted-damage-percent: 75
 
-disallowed-damage-types:
+bypass:
+  - SILVERFISH
+
+blacklisted-damage-types:
 - FALL
 - FALLING_BLOCK
 - LAVA
 - DROWNING
 
-blacklisted-spawn-types:
+whitelisted-spawn-types:
 - CUSTOM
 
 blacklisted-below:
