@@ -13,6 +13,8 @@ import java.util.*;
 public class ConfigParser {
     public enum ModType {EXP, DROPS, BOTH, NEITHER}
     public enum ConfigToggles {
+        //Debug
+        DEBUG,
         //Bypass toggles
         ONLY_NERF_HOSTILES, ALLOW_SKELETON_CREEPER_DAMAGE, ALLOW_WITHER_DAMAGE,
         //Nerfing checks
@@ -29,7 +31,6 @@ public class ConfigParser {
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxBlacklistedDamage = 100;
-    private static boolean debug = false;
 
     public static void validateConfig() {
         //you're doing the best you can, config.
@@ -59,7 +60,7 @@ public class ConfigParser {
         boolean allowProjectileDamageBoolean = config.getBoolean("allow-projectile-damage");
         boolean skeletonsDamageCreepersBoolean = config.getBoolean("skeletons-can-damage-creepers");
         boolean withersDamageEntitiesBoolean = config.getBoolean("withers-can-damage-entities");
-        debug = config.getBoolean("debug");
+        boolean debugSetting = config.getBoolean("debug");
 
         // Assemble the Stand On BlackList
         for (String type : standStringList) {
@@ -153,6 +154,7 @@ public class ConfigParser {
         }
 
         // Set Booleans
+        configToggles.put(ConfigToggles.DEBUG, debugSetting);
         configToggles.put(ConfigToggles.ONLY_NERF_HOSTILES, nerfHostilesBoolean);
         configToggles.put(ConfigToggles.ALLOW_SKELETON_CREEPER_DAMAGE, skeletonsDamageCreepersBoolean);
         configToggles.put(ConfigToggles.ALLOW_WITHER_DAMAGE, withersDamageEntitiesBoolean);
@@ -207,8 +209,5 @@ public class ConfigParser {
         return maxBlacklistedDamage;
     }
 
-    public static boolean isDebug() {
-        return debug;
-    }
 
 }
