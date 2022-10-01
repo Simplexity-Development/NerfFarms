@@ -1,5 +1,6 @@
 package adhdmc.nerffarms.listener;
 
+
 import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
 import org.bukkit.NamespacedKey;
@@ -10,21 +11,15 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import adhdmc.nerffarms.config.ConfigParser.ModType;
 
-import java.util.logging.Logger;
-
 public class MobDeathListener implements Listener {
     NamespacedKey nerfMob = MobDamageListener.nerfMob;
-    boolean debug = ConfigParser.getConfigToggles().get(ConfigParser.ConfigToggles.DEBUG);
-    Logger logger = NerfFarms.plugin.getLogger();
 
     @EventHandler
     public void onMobDeath(EntityDeathEvent deathEvent) {
         Entity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
         if (mobPDC.has(nerfMob)) {
-            if (debug) {
-                logger.info("Running clearDrops");
-            }
+            NerfFarms.debugMessage("Running clearDrops");
             clearDrops(deathEvent);
         }
     }
@@ -32,15 +27,11 @@ public class MobDeathListener implements Listener {
     private void clearDrops(EntityDeathEvent entity) {
         ModType configMod = ConfigParser.getModType();
         if (configMod == ModType.EXP || configMod == ModType.BOTH) {
-            if (debug) {
-                logger.info("configMod Setting clears EXP.");
-            }
+            NerfFarms.debugMessage("configMod Setting clears EXP.");
             entity.setDroppedExp(0);
         }
         if (configMod == ModType.DROPS || configMod == ModType.BOTH) {
-            if (debug) {
-                logger.info("configMod Setting clears Drops.");
-            }
+            NerfFarms.debugMessage("configMod Setting clears Drops.");
             entity.getDrops().clear();
         }
     }
