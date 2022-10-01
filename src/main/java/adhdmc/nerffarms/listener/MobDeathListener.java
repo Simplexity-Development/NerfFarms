@@ -6,6 +6,7 @@ import adhdmc.nerffarms.config.ConfigParser;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -14,7 +15,7 @@ import adhdmc.nerffarms.config.ConfigParser.ModType;
 public class MobDeathListener implements Listener {
     NamespacedKey nerfMob = MobDamageListener.nerfMob;
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMobDeath(EntityDeathEvent deathEvent) {
         Entity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
