@@ -25,15 +25,15 @@ public class MobDeathListener implements Listener {
         }
     }
 
-    private void clearDrops(EntityDeathEvent entity) {
+    private void clearDrops(EntityDeathEvent deathEvent) {
         ModType configMod = ConfigParser.getModType();
         if (configMod == ModType.EXP || configMod == ModType.BOTH) {
             NerfFarms.debugMessage("configMod Setting clears EXP.");
-            entity.setDroppedExp(0);
+            deathEvent.setDroppedExp(0);
         }
         if (configMod == ModType.DROPS || configMod == ModType.BOTH) {
             NerfFarms.debugMessage("configMod Setting clears Drops.");
-            entity.getDrops().clear();
+            deathEvent.getDrops().clear();
         }
     }
 }
