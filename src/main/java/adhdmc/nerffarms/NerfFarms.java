@@ -17,7 +17,6 @@ import java.util.List;
 public final class NerfFarms extends JavaPlugin {
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
-    public final String version = "0.1.0";
 
     @Override
     public void onEnable() {
@@ -62,5 +61,10 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("max-distance", 15);
         config.addDefault("blacklisted-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
         config.addDefault("max-blacklisted-damage-percent", 75);
+    }
+
+    public static void debugMessage(String message) {
+        if (!ConfigParser.isDebug()) return;
+        plugin.getLogger().info(message);
     }
 }
