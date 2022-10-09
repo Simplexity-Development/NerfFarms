@@ -160,10 +160,10 @@ public class MobDamageListener implements Listener {
 
     private boolean checkForBlockedLineOfSight(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
         if (!(entity instanceof LivingEntity)) return false;
-        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return true;
+        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return false;
         Entity damager = event.getDamager();
-        boolean lineofsight = ((LivingEntity) entity).hasLineOfSight(damager);
-        if (!lineofsight) {
+        boolean lineOfSight = ((LivingEntity) entity).hasLineOfSight(damager);
+        if (!lineOfSight) {
             NerfFarms.debugMessage("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid line of sight to the damager"
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
             addPDCDamage(mobPDC, damageAmount);
@@ -222,6 +222,8 @@ public class MobDamageListener implements Listener {
 
     private boolean checkForProjectileDamage(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage){
         if (!(event.getDamager() instanceof Projectile projectile)) return false;
+
+        NerfFarms.debugMessage("Performing checkForProjectileDamage on " + entity.getName());
 
         if (!configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
             NerfFarms.debugMessage("Arrow damage is not allowed");
