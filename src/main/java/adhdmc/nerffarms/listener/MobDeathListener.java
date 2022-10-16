@@ -2,7 +2,7 @@ package adhdmc.nerffarms.listener;
 
 
 import adhdmc.nerffarms.NerfFarms;
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.config.ModType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -10,7 +10,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
-import adhdmc.nerffarms.config.ConfigParser.ModType;
 
 public class MobDeathListener implements Listener {
     NamespacedKey nerfMob = MobDamageListener.nerfMob;
@@ -26,7 +25,7 @@ public class MobDeathListener implements Listener {
     }
 
     private void clearDrops(EntityDeathEvent deathEvent) {
-        ModType configMod = ConfigParser.getModType();
+        ModType configMod = ModType.getModType();
         if (configMod == ModType.EXP || configMod == ModType.BOTH) {
             NerfFarms.debugMessage("configMod Setting clears EXP.");
             deathEvent.setDroppedExp(0);

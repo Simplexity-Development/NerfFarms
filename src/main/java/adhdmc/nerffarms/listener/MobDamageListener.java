@@ -2,6 +2,7 @@ package adhdmc.nerffarms.listener;
 
 import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.config.ConfigToggle;
 import com.destroystokyo.paper.entity.Pathfinder;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,7 +23,6 @@ import java.util.Objects;
 public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
     public static final NamespacedKey blacklistedDamage = new NamespacedKey(NerfFarms.plugin, "blacklisted-damage");
-    private static final Map<ConfigParser.ConfigToggles, Boolean> configToggles = ConfigParser.getConfigToggles();
     private static final byte t = 1;
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -91,7 +91,7 @@ public class MobDamageListener implements Listener {
 
     private boolean isHostileNerf(Entity entity) {
         NerfFarms.debugMessage("Performing isHostileNerf on " + entity.getName());
-        if (configToggles.get(ConfigParser.ConfigToggles.ONLY_NERF_HOSTILES) && !(entity instanceof Monster)) {
+        if (ConfigToggle.ONLY_NERF_HOSTILES.isEnabled() && !(entity instanceof Monster)) {
             NerfFarms.debugMessage("Ignoring onMobDamage because " + entity.getName() + " is not a Monster and Nerf Hostiles Only is True.");
             return true;
         }
@@ -160,7 +160,7 @@ public class MobDamageListener implements Listener {
 
     private boolean checkForBlockedLineOfSight(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
         if (!(entity instanceof LivingEntity)) return false;
-        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_LINE_OF_SIGHT)) return false;
+        if (!ConfigToggle.REQUIRE_LINE_OF_SIGHT.isEnabled()) return false;
         Entity damager = event.getDamager();
         boolean lineOfSight = ((LivingEntity) entity).hasLineOfSight(damager);
         if (!lineOfSight) {
@@ -179,15 +179,15 @@ public class MobDamageListener implements Listener {
         NerfFarms.debugMessage("Performing isNerfableNonPlayerKill on " + entity.getName());
         if (damager instanceof AbstractSkeleton &&
                 entity instanceof Creeper
-                && configToggles.get(ConfigParser.ConfigToggles.ALLOW_SKELETON_CREEPER_DAMAGE)) {
+                && ConfigToggle.ALLOW_SKELETON_CREEPER_DAMAGE.isEnabled()) {
             NerfFarms.debugMessage("Skipping nerf on " + entity.getName() + "because 'Skeletons can damage creepers' is 'true'");
             return true;
         }
-        if (damager instanceof Wither && configToggles.get(ConfigParser.ConfigToggles.ALLOW_WITHER_DAMAGE)) {
+        if (damager instanceof Wither && ConfigToggle.ALLOW_WITHER_DAMAGE.isEnabled()) {
             NerfFarms.debugMessage("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'");
             return true;
         }
-        if (damager instanceof Projectile && configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
+        if (damager instanceof Projectile && ConfigToggle.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
             return false;
         }
 
@@ -202,15 +202,13 @@ public class MobDamageListener implements Listener {
     }
 
     private boolean checkIfMobCanMoveToward(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double damageAmount) {
-        if (!configToggles.get(ConfigParser.ConfigToggles.REQUIRE_PATH)) return false;
+        if (!ConfigToggle.REQUIRE_PATH.isEnabled()) return false;
         if (!(entity instanceof LivingEntity)) return false;
         Entity damager = event.getDamager();
         Location targetLoc = damager.getLocation();
         Pathfinder.PathResult entityPath = ((Mob) entity).getPathfinder().findPath(targetLoc);
-
         if (entityPath == null) return false;
-
-        if (!(entityPath.getPoints().size() > 1)) {
+        if (!(entityPath.getPoints().size() > 1) ) {
             NerfFarms.debugMessage("Adding " + damageAmount + " to " + entity.getName() + "'s PDC because they do not have a valid way to move towards the damager"
                         + "\nCurrent PDC amount is: " + mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0));
             addPDCDamage(mobPDC, damageAmount);
@@ -225,7 +223,7 @@ public class MobDamageListener implements Listener {
 
         NerfFarms.debugMessage("Performing checkForProjectileDamage on " + entity.getName());
 
-        if (!configToggles.get(ConfigParser.ConfigToggles.ALLOW_PROJECTILE_DAMAGE)){
+        if (!ConfigToggle.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
             NerfFarms.debugMessage("Arrow damage is not allowed");
             addPDCDamage(mobPDC, hitDamage);
             checkIfPassedBlacklistedDamagePercent(mobPDC, entity);

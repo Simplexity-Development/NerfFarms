@@ -11,55 +11,35 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ConfigParser {
-    public enum ModType {EXP, DROPS, BOTH, NEITHER}
-    public enum ConfigToggles {
-        //Bypass toggles
-        ONLY_NERF_HOSTILES, ALLOW_SKELETON_CREEPER_DAMAGE, ALLOW_WITHER_DAMAGE,
-        //Nerfing checks
-        REQUIRE_PATH, REQUIRE_LINE_OF_SIGHT, ALLOW_PROJECTILE_DAMAGE
-        }
-
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> bypassList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
-    private static ModType modType = ModType.NEITHER;
-    private static final HashMap<ConfigToggles, Boolean> configToggles = new HashMap<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxBlacklistedDamage = 100;
     private static boolean debug = false;
 
     public static void validateConfig() {
-        //you're doing the best you can, config.
+        //you're doing the best you can, NerfFarms.plugin.getConfig().
         //clear any set stuff.
         standOnBlacklist.clear();
         insideBlacklist.clear();
         bypassList.clear();
         spawnReasonList.clear();
         blacklistedDamageTypes.clear();
-        modType = null;
-        configToggles.clear();
         maxDistance = 0;
         errorCount = 0;
         maxBlacklistedDamage = 100;
-        FileConfiguration config = NerfFarms.plugin.getConfig();
-        List<String> standStringList = config.getStringList("blacklisted-below");
-        List<String> inStringList = config.getStringList("blacklisted-in");
-        List<String> bypassStringList = config.getStringList("bypass");
-        List<String> spawnReasonStringList = config.getStringList("whitelisted-spawn-types");
-        List<String> blacklistedDamageTypesList = config.getStringList("blacklisted-damage-types");
-        String modificationTypeString = config.getString("modification-type");
-        int maxDistanceInt = config.getInt("max-distance");
-        int maxBlacklistedDamageConfig = config.getInt("max-blacklisted-damage-percent");
-        boolean nerfHostilesBoolean = config.getBoolean("only-nerf-hostiles");
-        boolean requirePathBoolean = config.getBoolean("require-path");
-        boolean requireLineOfSightBoolean = config.getBoolean("require-line-of-sight");
-        boolean allowProjectileDamageBoolean = config.getBoolean("allow-projectile-damage");
-        boolean skeletonsDamageCreepersBoolean = config.getBoolean("skeletons-can-damage-creepers");
-        boolean withersDamageEntitiesBoolean = config.getBoolean("withers-can-damage-entities");
-        debug = config.getBoolean("debug");
+        List<String> standStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-below");
+        List<String> inStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-in");
+        List<String> bypassStringList = NerfFarms.plugin.getConfig().getStringList("bypass");
+        List<String> spawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-spawn-types");
+        List<String> blacklistedDamageTypesList = NerfFarms.plugin.getConfig().getStringList("blacklisted-damage-types");
+        int maxDistanceInt = NerfFarms.plugin.getConfig().getInt("max-distance");
+        int maxBlacklistedDamageConfig = NerfFarms.plugin.getConfig().getInt("max-blacklisted-damage-percent");
+        debug = NerfFarms.plugin.getConfig().getBoolean("debug");
 
         // Assemble the Stand On BlackList
         for (String type : standStringList) {
@@ -113,7 +93,6 @@ public class ConfigParser {
             }
             spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
         }
-
         // Generate Environmental Causes
         for (String type : blacklistedDamageTypesList) {
             try {
@@ -125,14 +104,8 @@ public class ConfigParser {
             }
             blacklistedDamageTypes.add(EntityDamageEvent.DamageCause.valueOf(type));
         }
-
         // Determine modType
-        try {
-            modType = ModType.valueOf(modificationTypeString);
-        } catch (IllegalArgumentException exception) {
-            NerfFarms.plugin.getLogger().severe(modificationTypeString + " is not a valid modification type. Plugin will not function properly until this is fixed.");
-            modType = ModType.NEITHER;
-        }
+        ModType.setModType();
 
         // Determine Distance
         if (!(maxDistanceInt > 1 && maxDistanceInt < 120)) {
@@ -151,14 +124,7 @@ public class ConfigParser {
         } else {
             maxBlacklistedDamage = maxBlacklistedDamageConfig;
         }
-
-        // Set Booleans
-        configToggles.put(ConfigToggles.ONLY_NERF_HOSTILES, nerfHostilesBoolean);
-        configToggles.put(ConfigToggles.ALLOW_SKELETON_CREEPER_DAMAGE, skeletonsDamageCreepersBoolean);
-        configToggles.put(ConfigToggles.ALLOW_WITHER_DAMAGE, withersDamageEntitiesBoolean);
-        configToggles.put(ConfigToggles.REQUIRE_PATH, requirePathBoolean);
-        configToggles.put(ConfigToggles.REQUIRE_LINE_OF_SIGHT, requireLineOfSightBoolean);
-        configToggles.put(ConfigToggles.ALLOW_PROJECTILE_DAMAGE, allowProjectileDamageBoolean);
+        ConfigToggle.reloadToggles();
     }
 
     public static Set<Material> getStandOnBlackList() {
@@ -186,10 +152,6 @@ public class ConfigParser {
      *
      * @return ModType enum, defaults to NEITHER
      */
-    @NotNull
-    public static ModType getModType() {
-        return modType;
-    }
 
     public static int getMaxDistance() {
         return maxDistance;
@@ -197,10 +159,6 @@ public class ConfigParser {
 
     public static int getErrorCount() {
         return errorCount;
-    }
-
-    public static Map<ConfigToggles, Boolean> getConfigToggles() {
-        return Collections.unmodifiableMap(configToggles);
     }
 
     public static int getMaxBlacklistedDamage() {
