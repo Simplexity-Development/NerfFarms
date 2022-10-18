@@ -19,7 +19,7 @@ public class MobDeathListener implements Listener {
         Entity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
         if (mobPDC.has(nerfMob)) {
-            NerfFarms.debugMessage("Running clearDrops");
+            NerfFarms.debugLvl3("Running clearDrops");
             clearDrops(deathEvent);
         }
     }
@@ -27,11 +27,11 @@ public class MobDeathListener implements Listener {
     private void clearDrops(EntityDeathEvent deathEvent) {
         ModType configMod = ModType.getModType();
         if (configMod == ModType.EXP || configMod == ModType.BOTH) {
-            NerfFarms.debugMessage("configMod Setting clears EXP.");
+            NerfFarms.debugLvl3("configMod Setting clears EXP.");
             deathEvent.setDroppedExp(0);
         }
         if (configMod == ModType.DROPS || configMod == ModType.BOTH) {
-            NerfFarms.debugMessage("configMod Setting clears Drops.");
+            NerfFarms.debugLvl3("configMod Setting clears Drops.");
             deathEvent.getDrops().clear();
         }
     }

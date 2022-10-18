@@ -9,11 +9,14 @@
 #Damage Types: https://purpurmc.org/javadoc/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
 
 #only change this if asked
-debug: false
+debug: 0
 
-require-path: false
+require-path: true
 
-require-line-of-sight: false
+#NOT CURRENTLY IN USE
+require-open-surroundings: true
+
+require-line-of-sight: true
 
 only-nerf-hostiles: true
 
@@ -25,20 +28,32 @@ withers-can-damage-entities: true
 
 #[DROPS|EXP|BOTH|NEITHER]
 
-modification-type: "NEITHER"
+modification-type: "BOTH"
 
 max-distance: 15
 
 max-blacklisted-damage-percent: 75
 
 bypass:
-- SILVERFISH
+#- SILVERFISH
 
 blacklisted-damage-types:
+- BLOCK_EXPLOSION
+- CONTACT
+- CRAMMING
+- DRAGON_BREATH
+- DROWNING
+- DRYOUT
 - FALL
 - FALLING_BLOCK
+- FIRE
+- FIRE_TICK
+- FREEZE
+- HOT_FLOOR
 - LAVA
-- DROWNING
+- LIGHTNING
+- SUFFOCATION
+- SUICIDE
 
 whitelisted-spawn-types:
 - CUSTOM

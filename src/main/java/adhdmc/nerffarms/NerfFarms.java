@@ -46,26 +46,34 @@ public final class NerfFarms extends JavaPlugin {
 
     private void configDefaults() {
         FileConfiguration config = getConfig();
-        config.addDefault("debug", false);
+        config.addDefault("debug", 0);
         config.addDefault("only-nerf-hostiles", true);
         config.addDefault("bypass", List.of(""));
-        config.addDefault("modification-type", "NEITHER");
+        config.addDefault("modification-type", "BOTH");
         config.addDefault("whitelisted-spawn-types", List.of("CUSTOM"));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
         config.addDefault("allow-projectile-damage", true);
-        config.addDefault("require-path", false);
-        config.addDefault("require-line-of-sight", false);
+        config.addDefault("require-path", true);
+        config.addDefault("require-open-surroundings", true);
+        config.addDefault("require-line-of-sight", true);
         config.addDefault("skeletons-can-damage-creepers", true);
         config.addDefault("withers-can-damage-entities", true);
         config.addDefault("max-distance", 15);
-        config.addDefault("blacklisted-damage-types", Arrays.asList("FALL", "FALLING_BLOCK", "LAVA", "DROWNING"));
+        config.addDefault("blacklisted-damage-types", Arrays.asList("BLOCK_EXPLOSION", "CONTACT", "CRAMMING",
+        "DRAGON_BREATH", "DROWNING", "DRYOUT", "FALL", "FALLING_BLOCK", "FIRE", "FIRE_TICK", "FREEZE", "HOT_FLOOR",
+        "LAVA", "LIGHTNING", "SUFFOCATION", "SUICIDE"));
         config.addDefault("max-blacklisted-damage-percent", 75);
     }
 
-    public static void debugMessage(String message) {
-        if (!ConfigParser.isDebug()) return;
-        plugin.getLogger().info(message);
+    /**
+     * Used for the beginning of method calls
+     * @param message Debug Message String
+     */
+    public static void debugLvl1(String message) {
+        if (ConfigParser.debugLevel() == 1 || ConfigParser.debugLevel() == 4) {
+            plugin.getLogger().info(message);
+        }
     }
 
     /**
@@ -73,8 +81,9 @@ public final class NerfFarms extends JavaPlugin {
      * @param message Debug Message String
      */
     public static void debugLvl2(String message){
-        if (!ConfigParser.isDebug()) return;
-        plugin.getLogger().info(message);
+        if (ConfigParser.debugLevel() == 2 || ConfigParser.debugLevel() == 4) {
+            plugin.getLogger().info(message);
+        }
     }
 
     /**
@@ -82,7 +91,8 @@ public final class NerfFarms extends JavaPlugin {
      * @param message Debug Message String
      */
     public static void debugLvl3(String message){
-        if (!ConfigParser.isDebug()) return;
-        plugin.getLogger().info(message);
+        if (ConfigParser.debugLevel() == 3 || ConfigParser.debugLevel() == 4) {
+            plugin.getLogger().info(message);
+        }
     }
 }

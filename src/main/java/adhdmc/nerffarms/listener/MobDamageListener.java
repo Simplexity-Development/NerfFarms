@@ -4,6 +4,7 @@ import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
 import adhdmc.nerffarms.config.ConfigToggle;
 import adhdmc.nerffarms.util.CheckUtils;
+import adhdmc.nerffarms.util.LocationMath;
 import com.destroystokyo.paper.entity.Pathfinder;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,7 +19,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
 
 public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
@@ -44,13 +47,14 @@ public class MobDamageListener implements Listener {
             if (checkDistance(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
             if (!checkLineOfSight(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
             if (checkPath(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
+            //if (checkSurroundings(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
         }
 
         if (checkDamageType(damageEvent, damagedEntity, mobPDC, damageAmount)) return;
-        if (checkStandingOn(damagedEntity, mobPDC, damageAmount)) return;
-        if (checkStandingInside(damagedEntity, mobPDC, damageAmount)) return;
+        if (checkStandingOn(damageEvent, damagedEntity, mobPDC, damageAmount)) return;
+        if (checkStandingInside(damageEvent, damagedEntity, mobPDC, damageAmount)) return;
 
-        NerfFarms.debugMessage(damagedEntity.getName() + " has reached the end of mob damage calculations");
+        NerfFarms.debugLvl1(damagedEntity.getName() + " has reached the end of mob damage calculations");
     }
 
     /**
@@ -58,9 +62,19 @@ public class MobDamageListener implements Listener {
      * @param mobPDC Mob's Persistent Data Container
      * @param damage double Total Damage Dealt
      */
-    private void addPDCDamage(PersistentDataContainer mobPDC, double damage) {
+    private void addPDCDamage(EntityDamageEvent event, PersistentDataContainer mobPDC, double damage) {
+        if (!(event.getEntity() instanceof LivingEntity livingEntity)) return;
+        double totalHealth = livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
         double damageTotal = mobPDC.getOrDefault(blacklistedDamage, PersistentDataType.DOUBLE, 0.0);
-        damageTotal += damage;
+        if (damageTotal + damage > totalHealth) {
+            double currentHealth = ((LivingEntity) event.getEntity()).getHealth();
+            damageTotal += currentHealth;
+            NerfFarms.debugLvl3("damageTotal + damage was greater than total health, adding current health to PDC, which is: " + currentHealth
+            + ". Total damage is now " + damageTotal);
+        } else {
+            damageTotal += damage;
+            NerfFarms.debugLvl3("added " + damage + " to mob's PDC. Total damage is now " + damageTotal);
+        }
         mobPDC.set(blacklistedDamage, PersistentDataType.DOUBLE, damageTotal);
     }
 
@@ -75,9 +89,11 @@ public class MobDamageListener implements Listener {
         double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
         int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);
         if (percentDamage >= maxBlacklistedDamage) {
-            NerfFarms.debugMessage("Nerfing " + entity.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
+            NerfFarms.debugLvl3("Nerfing " + entity.getName() + " because they took " + percentDamage + "% total damage from nerfable causes");
             mobPDC.set(nerfMob, PersistentDataType.BYTE, t);
+            return;
         }
+        NerfFarms.debugLvl3(entity + " is not above the damage threshold. They are not being marked as nerfed.");
     }
 
     /**
@@ -86,7 +102,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean isMob(Entity entity) {
-        NerfFarms.debugMessage("Performing isMob on " + entity.getName());
+        NerfFarms.debugLvl1("Performing isMob on " + entity.getName());
         if (!(entity instanceof Mob)) {
             NerfFarms.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " is not a mob. Returning false");
             return false;
@@ -101,7 +117,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean isNerfed(Entity entity, PersistentDataContainer mobPDC) {
-        NerfFarms.debugMessage("Performing isNerfed on " + entity.getName());
+        NerfFarms.debugLvl1("Performing isNerfed on " + entity.getName());
         if (mobPDC.has(nerfMob)) {
             NerfFarms.debugLvl2(entity.getName() + " is already nerfed, ignoring, and returning true");
             return true;
@@ -116,7 +132,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkHostile(Entity entity) {
-        NerfFarms.debugMessage("Performing isHostileNerf on " + entity.getName());
+        NerfFarms.debugLvl1("Performing isHostileNerf on " + entity.getName());
         if (ConfigToggle.ONLY_NERF_HOSTILES.isEnabled() && !(entity instanceof Monster)) {
             NerfFarms.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " is not a Monster and Nerf Hostiles Only is True. Returning false");
             return false;
@@ -131,7 +147,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean isExemptedSpawnReason(Entity entity) {
-        NerfFarms.debugMessage("Performing isExemptedSpawnReason on " + entity.getName());
+        NerfFarms.debugLvl1("Performing isExemptedSpawnReason on " + entity.getName());
         if (ConfigParser.getSpawnReasonList().contains(entity.getEntitySpawnReason())) {
             NerfFarms.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " spawned from "
             + entity.getEntitySpawnReason() + " which isn't nerfed. Returning true");
@@ -147,7 +163,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean isExemptedMob(Entity entity) {
-        NerfFarms.debugMessage("Performing isExemptedMob on " + entity.getName());
+        NerfFarms.debugLvl1("Performing isExemptedMob on " + entity.getName());
         if (ConfigParser.getBypassList().contains(entity.getType())) {
             NerfFarms.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " is on the bypass list as "
             + entity.getType() + ". Returning true");
@@ -167,10 +183,10 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkDamageType(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkDamageType on " + entity.getName());
+        NerfFarms.debugLvl1("Performing checkDamageType on " + entity.getName());
         if (ConfigParser.getblacklistedDamageTypesSet().contains(event.getCause())) {
             NerfFarms.debugLvl2(event.getCause() + " is a blacklisted damage type. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -180,19 +196,20 @@ public class MobDamageListener implements Listener {
 
     /**
      * Checks the block the damaged mob is standing on, and compares it to the configured blacklist
-     * Returns true if the block matches one of the blacklisted types
+     * Returns true if the block matches one of the blacklisted type
+     * @param event EntityDamageEvent
      * @param entity Damaged Entity
      * @param mobPDC Mob's Persistent Data Container
      * @param hitDamage double Final Damage
      * @return boolean
      */
-    private boolean checkStandingOn(Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkStandingOn on " + entity.getName());
+    private boolean checkStandingOn(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
+        NerfFarms.debugLvl1("Performing checkStandingOn on " + entity.getName());
         Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
         if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
             NerfFarms.debugLvl2(entityStandingOn + " is a 'blacklisted-below' block. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -203,17 +220,18 @@ public class MobDamageListener implements Listener {
     /**
      * Checks the block the damaged mob is standing inside, and compares it to the configured blacklist
      * Returns true if the block matches one of the blacklisted types
+     * @param event EntityDamageEvent
      * @param entity Damaged Entity
      * @param mobPDC Mob's Persistent Data Container
      * @param hitDamage double Final Damage
      * @return boolean
      */
-    private boolean checkStandingInside(Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkStandingInside on " + entity.getName());
+    private boolean checkStandingInside(EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
+        NerfFarms.debugLvl1("Performing checkStandingInside on " + entity.getName());
         Material entityStandingIn = entity.getLocation().getBlock().getType();
         if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
             NerfFarms.debugLvl2(entityStandingIn + " is a 'blacklisted-in' block. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -231,21 +249,21 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkLineOfSight(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkLineOfSight on " + entity.getName());
+        NerfFarms.debugLvl1("Performing checkLineOfSight on " + entity.getName());
         if (!(entity instanceof LivingEntity)) return true;
         if (!ConfigToggle.REQUIRE_LINE_OF_SIGHT.isEnabled()) return true;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null) {
             NerfFarms.debugLvl2("Mob does not have a viable line-of-sight because 'getRealDamager' has returned a null value. " +
             "Returning false");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return false;
         }
         boolean lineOfSight = ((LivingEntity) entity).hasLineOfSight(damager);
         if (!lineOfSight) {
             NerfFarms.debugLvl2("Mob does not have a viable line-of-sight to " + damager + ". Returning false");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return false;
         }
@@ -266,7 +284,7 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkDamager(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkDamager on " + entity.getName());
+        NerfFarms.debugLvl1("Performing checkDamager on " + entity.getName());
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager instanceof Wither && ConfigToggle.ALLOW_WITHER_DAMAGE.isEnabled()) {
             NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'. Returning true");
@@ -278,8 +296,8 @@ public class MobDamageListener implements Listener {
         }
         //TODO: Make this configurable
         if (!(damager instanceof Player)) {
-            NerfFarms.debugMessage("Damager is not a player, returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            NerfFarms.debugLvl1("Damager is not a player, returning true");
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -297,14 +315,14 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkPath(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkPath on " + entity.getName());
+        NerfFarms.debugLvl1("Performing checkPath on " + entity.getName());
         if (!ConfigToggle.REQUIRE_PATH.isEnabled()) return false;
         if (!(entity instanceof LivingEntity)) return false;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null){
             NerfFarms.debugLvl2("Entity does not have a path to the player, because 'getRealDamager' returned a null value. " +
             "Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -316,7 +334,7 @@ public class MobDamageListener implements Listener {
         }
         if (!(entityPath.getPoints().size() > 1) ) {
             NerfFarms.debugLvl2("Entity does not have a path to the player. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -334,11 +352,11 @@ public class MobDamageListener implements Listener {
      * @return boolean
      */
     private boolean checkDistance(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
-        NerfFarms.debugMessage("Performing checkDistance on " + entity.getName());
+        NerfFarms.debugLvl1("Performing checkDistance on " + entity.getName());
         LivingEntity damager = CheckUtils.getRealDamager(event);
         if (damager == null) {
             NerfFarms.debugLvl2("Cannot check distance because the return value of getRealDamager is null. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
@@ -347,12 +365,50 @@ public class MobDamageListener implements Listener {
         double distanceBetween = entityLoc.distance(damagerLoc);
         if (distanceBetween > ConfigParser.getMaxDistance()) {
             NerfFarms.debugLvl2(entity.getName() + " is above the max configured distance from the damager. Returning true");
-            addPDCDamage(mobPDC, hitDamage);
+            addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
         NerfFarms.debugLvl2("Cleared all 'checkDistance' checks. Returning false");
         return false;
     }
+
+    /*
+    private boolean checkSurroundings(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage){
+        LivingEntity damager = CheckUtils.getRealDamager(event);
+        NerfFarms.debugLvl1("Performing checkSurroundings on " + entity.getName());
+        if (!ConfigToggle.REQUIRE_OPEN_SURROUNDINGS.isEnabled()) {
+            NerfFarms.debugLvl2("Configuration is not requiring open surroundings. Returning false");
+            return false;
+        }
+        if (damager == null) {
+            NerfFarms.debugLvl2("Cannot check surroundings because the return value of getRealDamager is null. Returning true");
+            addPDCDamage(event, mobPDC, hitDamage);
+            checkDamageThreshold(mobPDC, entity);
+            return true;
+        }
+        Location damagerLoc = damager.getLocation();
+        Location entityLoc = entity.getLocation();
+        Set<Location> locationSet = LocationMath.getAdjacentTowards(entityLoc, damagerLoc);
+        int nonAirBlocks = 0;
+        for (Location location : locationSet) {
+            double entityHeight = entity.getHeight();
+            if (entityHeight > 1) {
+                location = location.add(0, (entityHeight - 1), 0);
+            }
+            if (!location.getBlock().getType().equals(Material.AIR)){
+                nonAirBlocks += 1;
+            }
+        }
+        if (nonAirBlocks > 1) {
+            NerfFarms.debugLvl2("2 or more blocks were in the way of this mob. Returning true");
+            addPDCDamage(event, mobPDC, hitDamage);
+            checkDamageThreshold(mobPDC, entity);
+            return true;
+        }
+        NerfFarms.debugLvl2("Cleared all 'checkSurroundings' checks. Returning false");
+        return false;
+    }
+    */
 
 }

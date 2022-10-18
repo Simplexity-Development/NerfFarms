@@ -8,8 +8,9 @@ public enum ConfigToggle {
     ALLOW_SKELETON_CREEPER_DAMAGE(true),
     ALLOW_WITHER_DAMAGE(true),
     //Nerfing checks
-    REQUIRE_PATH(false),
-    REQUIRE_LINE_OF_SIGHT(false),
+    REQUIRE_PATH(true),
+    REQUIRE_OPEN_SURROUNDINGS(true),
+    REQUIRE_LINE_OF_SIGHT(true),
     ALLOW_PROJECTILE_DAMAGE(true);
 
     boolean toggle;
@@ -30,6 +31,7 @@ public enum ConfigToggle {
         ALLOW_SKELETON_CREEPER_DAMAGE.setEnabled(NerfFarms.plugin.getConfig().getBoolean("skeletons-can-damage-creepers"));
         ALLOW_WITHER_DAMAGE.setEnabled(NerfFarms.plugin.getConfig().getBoolean("withers-can-damage-entities"));
         REQUIRE_PATH.setEnabled(NerfFarms.plugin.getConfig().getBoolean("require-path"));
+        REQUIRE_OPEN_SURROUNDINGS.setEnabled(NerfFarms.plugin.getConfig().getBoolean("require-open-surroundings"));
         REQUIRE_LINE_OF_SIGHT.setEnabled(NerfFarms.plugin.getConfig().getBoolean("require-line-of-sight"));
         ALLOW_PROJECTILE_DAMAGE.setEnabled(NerfFarms.plugin.getConfig().getBoolean("allow-projectile-damage"));
     }

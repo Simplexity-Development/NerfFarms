@@ -19,7 +19,7 @@ public class ConfigParser {
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxBlacklistedDamage = 100;
-    private static boolean debug = false;
+    private static int debug = 0;
 
     public static void validateConfig() {
         //you're doing the best you can, NerfFarms.plugin.getConfig().
@@ -31,6 +31,7 @@ public class ConfigParser {
         blacklistedDamageTypes.clear();
         maxDistance = 0;
         errorCount = 0;
+        debug = 0;
         maxBlacklistedDamage = 100;
         List<String> standStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-below");
         List<String> inStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-in");
@@ -39,7 +40,7 @@ public class ConfigParser {
         List<String> blacklistedDamageTypesList = NerfFarms.plugin.getConfig().getStringList("blacklisted-damage-types");
         int maxDistanceInt = NerfFarms.plugin.getConfig().getInt("max-distance");
         int maxBlacklistedDamageConfig = NerfFarms.plugin.getConfig().getInt("max-blacklisted-damage-percent");
-        debug = NerfFarms.plugin.getConfig().getBoolean("debug");
+        debug = NerfFarms.plugin.getConfig().getInt("debug");
 
         // Assemble the Stand On BlackList
         for (String type : standStringList) {
@@ -165,7 +166,7 @@ public class ConfigParser {
         return maxBlacklistedDamage;
     }
 
-    public static boolean isDebug() {
+    public static int debugLevel() {
         return debug;
     }
 
