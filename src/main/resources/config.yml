@@ -32,7 +32,7 @@ max-distance: 15
 max-blacklisted-damage-percent: 75
 
 bypass:
-  - SILVERFISH
+- SILVERFISH
 
 blacklisted-damage-types:
 - FALL

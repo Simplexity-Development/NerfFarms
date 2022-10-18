@@ -67,4 +67,22 @@ public final class NerfFarms extends JavaPlugin {
         if (!ConfigParser.isDebug()) return;
         plugin.getLogger().info(message);
     }
+
+    /**
+     * Used for return statements, and their explanations
+     * @param message Debug Message String
+     */
+    public static void debugLvl2(String message){
+        if (!ConfigParser.isDebug()) return;
+        plugin.getLogger().info(message);
+    }
+
+    /**
+     * Used for methods that are called in assistance to other methods
+     * @param message Debug Message String
+     */
+    public static void debugLvl3(String message){
+        if (!ConfigParser.isDebug()) return;
+        plugin.getLogger().info(message);
+    }
 }
