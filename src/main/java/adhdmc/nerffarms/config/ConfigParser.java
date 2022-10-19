@@ -18,6 +18,7 @@ public class ConfigParser {
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
+
     private static int maxBlacklistedDamage = 100;
     private static int debug = 0;
 

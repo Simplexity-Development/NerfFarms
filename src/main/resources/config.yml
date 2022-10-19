@@ -13,7 +13,6 @@ debug: 0
 
 require-path: true
 
-#NOT CURRENTLY IN USE
 require-open-surroundings: true
 
 require-line-of-sight: true

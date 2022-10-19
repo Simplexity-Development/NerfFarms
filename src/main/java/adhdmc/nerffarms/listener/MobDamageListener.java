@@ -47,7 +47,7 @@ public class MobDamageListener implements Listener {
             if (checkDistance(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
             if (!checkLineOfSight(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
             if (checkPath(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
-            //if (checkSurroundings(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
+            if (checkSurroundings(damageByEntityEvent, damagedEntity, mobPDC, damageAmount)) return;
         }
 
         if (checkDamageType(damageEvent, damagedEntity, mobPDC, damageAmount)) return;
@@ -373,7 +373,7 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
-    /*
+
     private boolean checkSurroundings(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage){
         LivingEntity damager = CheckUtils.getRealDamager(event);
         NerfFarms.debugLvl1("Performing checkSurroundings on " + entity.getName());
@@ -387,21 +387,24 @@ public class MobDamageListener implements Listener {
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
-        Location damagerLoc = damager.getLocation();
-        Location entityLoc = entity.getLocation();
-        Set<Location> locationSet = LocationMath.getAdjacentTowards(entityLoc, damagerLoc);
+        double entityHeight = entity.getHeight();
+        Location entityLocation;
+        if (entityHeight > 1) {
+          entityLocation = entity.getLocation().add(0, (entityHeight - 1), 0);
+        } else {
+            entityLocation = entity.getLocation();
+        }
+        Set<Location> checkLocations = LocationMath.blockedLocations(entityLocation);
         int nonAirBlocks = 0;
-        for (Location location : locationSet) {
-            double entityHeight = entity.getHeight();
-            if (entityHeight > 1) {
-                location = location.add(0, (entityHeight - 1), 0);
-            }
+        for (Location location : checkLocations) {
+            NerfFarms.debugLvl2("Checking Location");
             if (!location.getBlock().getType().equals(Material.AIR)){
+                NerfFarms.debugLvl2("Not air");
                 nonAirBlocks += 1;
             }
         }
-        if (nonAirBlocks > 1) {
-            NerfFarms.debugLvl2("2 or more blocks were in the way of this mob. Returning true");
+        if (nonAirBlocks > 3) {
+            NerfFarms.debugLvl2("3 or more blocks were in the way of this mob. Returning true");
             addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
@@ -409,6 +412,5 @@ public class MobDamageListener implements Listener {
         NerfFarms.debugLvl2("Cleared all 'checkSurroundings' checks. Returning false");
         return false;
     }
-    */
 
 }
