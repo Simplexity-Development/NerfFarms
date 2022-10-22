@@ -20,6 +20,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public class MobDamageListener implements Listener {
     public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
     public static final NamespacedKey blacklistedDamage = new NamespacedKey(NerfFarms.plugin, "blacklisted-damage");
     private static final byte t = 1;
+    private static final ArrayList<Material> air = new ArrayList<>(List.of(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR));
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMobDamage(EntityDamageEvent damageEvent) {
@@ -332,8 +334,24 @@ public class MobDamageListener implements Listener {
             NerfFarms.debugLvl2("Entity's path is null. Returning false");
             return false;
         }
-        if (!(entityPath.getPoints().size() > 1) ) {
-            NerfFarms.debugLvl2("Entity does not have a path to the player. Returning true");
+        int pathLength =  entityPath.getPoints().size();
+        Location entityLoc = entity.getLocation();
+        double distance = entityLoc.distance(targetLoc);
+        List<Location> pathPoints = entityPath.getPoints();
+        if (pathLength <= 1 ) {
+            NerfFarms.debugLvl2("Entity does not have a path to the player (Path length less than or equal to 1). Returning true");
+            addPDCDamage(event, mobPDC, hitDamage);
+            checkDamageThreshold(mobPDC, entity);
+            return true;
+        }
+        if (!(air.contains(CheckUtils.getBlockAbove(pathPoints.get(1), entity)))) {
+            NerfFarms.debugLvl2("Entity does not have a path to the player (2nd path point is blocked). Returning true");
+            addPDCDamage(event, mobPDC, hitDamage);
+            checkDamageThreshold(mobPDC, entity);
+            return true;
+        }
+        if (!(air.contains(CheckUtils.getBlockAbove(pathPoints.get(2), entity)))) {
+            NerfFarms.debugLvl2("Entity does not have a path to the player (3rd path point is blocked). Returning true");
             addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
             return true;
@@ -373,6 +391,14 @@ public class MobDamageListener implements Listener {
         return false;
     }
 
+    /**
+     * Checks the blocks around a mob's head, to make sure it is not blocked from moving
+     * @param event EntityDamageEvent
+     * @param entity Damaged Entity
+     * @param mobPDC Mob's Persistent Data Container
+     * @param hitDamage double Final Damage
+     * @return boolean
+     */
 
     private boolean checkSurroundings(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage){
         LivingEntity damager = CheckUtils.getRealDamager(event);

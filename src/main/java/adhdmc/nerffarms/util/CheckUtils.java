@@ -2,12 +2,12 @@ package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigToggle;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.projectiles.ProjectileSource;
 
 public class CheckUtils {
 
@@ -37,5 +37,18 @@ public class CheckUtils {
         shooter = (LivingEntity) projectile.getShooter();
         NerfFarms.debugLvl2("getRealDamager check, shooter is a LivingEntity, returning player value of: " + shooter);
         return shooter;
+    }
+
+    public static Material getBlockAbove(Location location, Entity entity){
+        double entityHeight = entity.getHeight();
+        if (entityHeight > 1) {
+            location = location.add(0, (entityHeight - 1), 0);
+        }
+        NerfFarms.debugLvl3("getBlockAbove: MaterialType " + location.getBlock().getType() + "\nLocation: " + location);
+        return location.getBlock().getType();
+    }
+
+    public static Material getBlockBelow(Location location) {
+        return location.getBlock().getType();
     }
 }
