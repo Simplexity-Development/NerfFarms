@@ -17,11 +17,11 @@ public class ReloadCommand extends SubCommand {
 
     @Override
     public void doThing(CommandSender sender, String[] args) {
-        if (sender instanceof Player && !sender.hasPermission(CommandHandler.commandsPermission)) {
+        if (sender instanceof Player && !sender.hasPermission(CommandHandler.reloadPermission)) {
             sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize(CommandHandler.noPermission));
             return;
         }
-        if (!(sender instanceof Player) || sender.hasPermission(CommandHandler.commandsPermission)) {
+        if (!(sender instanceof Player) || sender.hasPermission(CommandHandler.reloadPermission)) {
             NerfFarms.plugin.reloadConfig();
             NerfFarms.plugin.saveConfig();
             ConfigParser.validateConfig();

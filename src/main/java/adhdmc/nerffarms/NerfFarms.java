@@ -15,6 +15,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class NerfFarms extends JavaPlugin {
+    //TODO: Add config for a message that is sent to the player when the mob they kill is nerfed
+    //TODO: Add a toggle command for that message
+    //TODO: Add a config option for allowing non-player kills (checkDamager method in MobDamageListener)
+    //TODO: Add configuration for max height diff between mob and attacker
+    //TODO: Move permissions to an Enum
+    //TODO: Move messages to an Enum
     public static NerfFarms plugin;
     public final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -48,9 +54,11 @@ public final class NerfFarms extends JavaPlugin {
         FileConfiguration config = getConfig();
         config.addDefault("debug", 0);
         config.addDefault("only-nerf-hostiles", true);
-        config.addDefault("bypass", List.of(""));
+        config.addDefault("whitelisted-mobs", List.of(""));
+        config.addDefault("blacklisted-mobs", List.of(""));
         config.addDefault("modification-type", "BOTH");
-        config.addDefault("whitelisted-spawn-types", List.of("CUSTOM"));
+        config.addDefault("whitelisted-spawn-reasons", List.of("CUSTOM"));
+        config.addDefault("blacklisted-spawn-reasons", List.of(""));
         config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
         config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
         config.addDefault("allow-projectile-damage", true);
@@ -59,7 +67,7 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("require-line-of-sight", true);
         config.addDefault("skeletons-can-damage-creepers", true);
         config.addDefault("withers-can-damage-entities", true);
-        config.addDefault("max-distance", 15);
+        config.addDefault("max-total-distance", 15);
         config.addDefault("blacklisted-damage-types", Arrays.asList("BLOCK_EXPLOSION", "CONTACT", "CRAMMING",
         "DRAGON_BREATH", "DROWNING", "DRYOUT", "FALL", "FALLING_BLOCK", "FIRE", "FIRE_TICK", "FREEZE", "HOT_FLOOR",
         "LAVA", "LIGHTNING", "SUFFOCATION", "SUICIDE"));

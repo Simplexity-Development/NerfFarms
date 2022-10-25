@@ -19,6 +19,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     public static final String helpCommand = "/nerffarms help";
     public static final String reloadCommand = "/nerffarms reload";
     public static final String commandsPermission = "nerffarms.commands";
+    public static final String reloadPermission = "nerffarms.reload";
     public static final String noPermission = "<red>You do not have permission to run this command!";
 
     private static final HashMap<String, SubCommand> subcommandList = new HashMap<>();
@@ -44,7 +45,10 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
             return false;
         }
         if (args.length == 0) {
-            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/illogicalsong/NerfFarms'><green><hover:show_text:'<aqua>Click to visit the GitHub repository'>NerfFarms | Version: <version>\nAuthor: _Rhythmic</hover></click>", Placeholder.unparsed("version", NerfFarms.plugin.getDescription().getVersion())));
+            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/ADHDMC/NerfFarms'><gray><hover:show_text:'<aqua>Click to visit the GitHub repository'><green>NerfFarms</green> <white>|</white> Version: <green><version></green>\n<desc>\nAuthors: <green><author></hover></click>",
+                    Placeholder.unparsed("author",  NerfFarms.plugin.getDescription().getAuthors().toString()),
+                    Placeholder.unparsed("version", NerfFarms.plugin.getDescription().getVersion()),
+                    Placeholder.unparsed("desc", NerfFarms.plugin.getDescription().getDescription())));
             return true;
         }
         String command = args[0].toLowerCase();

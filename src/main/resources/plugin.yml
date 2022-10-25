@@ -2,6 +2,17 @@ name: NerfFarms
 version: '${project.version}'
 main: adhdmc.nerffarms.NerfFarms
 api-version: 1.19
+author: Rhythmic, Peashooter101
+website: https://github.com/ADHDMC/NerfFarms
+description: Allows greater control over farming on your server
 commands:
   nerffarms:
-    description: "base command for nerffarms"
+    permission: nerffarms.commands
+    description: Base command for nerffarms
+permissions:
+  nerffarms.commands:
+    description: Allows usage of /nerffarms
+    default: op
+  nerffarms.reload:
+    description: Allows user to reload the configuration
+    default: op

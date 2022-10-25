@@ -1,7 +1,13 @@
 #Nerf Farms Plugin
 #This plugin is intended to allow server owners to have more control over what types of mob farms their players can use.
-#For the purposes of this plugin, these rules will, by default, apply to mobs not killed by a player/player's pet. (Fall damage, crushing, drowning)
+#For the purposes of this plugin, these rules will, by default, apply to mobs not killed by a player/player's pet.
+#(Fall damage, crushing, drowning)
 #Additional config options are listed below.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#Support:
+#Plugin wiki: https://github.com/ADHDMC/NerfFarms/wiki
+#Plugin Discord: https://discord.gg/qe3YQrbegA
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #References:
 #Entities: https://jd.papermc.io/paper/1.19/org/bukkit/entity/package-summary.html
 #Materials/Blocks: https://jd.papermc.io/paper/1.19/org/bukkit/Material.html
@@ -12,8 +18,6 @@
 debug: 0
 
 require-path: true
-
-require-open-surroundings: true
 
 require-line-of-sight: true
 
@@ -33,8 +37,11 @@ max-distance: 15
 
 max-blacklisted-damage-percent: 75
 
-bypass:
+whitelisted-mobs:
 #- SILVERFISH
+
+blacklisted-mobs:
+#- ZOMBIE
 
 blacklisted-damage-types:
 - BLOCK_EXPLOSION
@@ -54,8 +61,11 @@ blacklisted-damage-types:
 - SUFFOCATION
 - SUICIDE
 
-whitelisted-spawn-types:
+whitelisted-spawn-reasons:
 - CUSTOM
+
+blacklisted-spawn-reasons:
+#- SPAWNER
 
 blacklisted-below:
 - MAGMA_BLOCK

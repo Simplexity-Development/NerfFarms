@@ -4,6 +4,7 @@ import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigToggle;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
@@ -39,14 +40,14 @@ public class CheckUtils {
         return shooter;
     }
 
-    public static Material getBlockAbove(Location location, Entity entity){
+    public static Block getBlockAbove(Location location, Entity entity){
         double entityHeight = entity.getHeight();
         if (entityHeight > 1) {
             int addToLoc = (int) Math.round(entityHeight - 1);
             location = location.add(0, addToLoc, 0);
         }
         NerfFarms.debugLvl3("getBlockAbove: MaterialType " + location.getBlock().getType() + "\nLocation: " + location);
-        return location.getBlock().getType();
+        return location.getBlock();
     }
 
     public static Material getBlockBelow(Location location) {

@@ -2,19 +2,19 @@ package adhdmc.nerffarms.config;
 
 import adhdmc.nerffarms.NerfFarms;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class ConfigParser {
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
-    private static final HashSet<EntityType> bypassList = new HashSet<>();
-    private static final HashSet<CreatureSpawnEvent.SpawnReason> spawnReasonList = new HashSet<>();
+    private static final HashSet<EntityType> whitelistedMobList = new HashSet<>();
+    private static final HashSet<EntityType> blacklistedMobList = new HashSet<>();
+    private static final HashSet<CreatureSpawnEvent.SpawnReason> whitelistedSpawnReasonList = new HashSet<>();
+    private static final HashSet<CreatureSpawnEvent.SpawnReason> blacklistedSpawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
@@ -27,8 +27,10 @@ public class ConfigParser {
         //clear any set stuff.
         standOnBlacklist.clear();
         insideBlacklist.clear();
-        bypassList.clear();
-        spawnReasonList.clear();
+        whitelistedMobList.clear();
+        blacklistedMobList.clear();
+        whitelistedSpawnReasonList.clear();
+        blacklistedSpawnReasonList.clear();
         blacklistedDamageTypes.clear();
         maxDistance = 0;
         errorCount = 0;
@@ -36,8 +38,10 @@ public class ConfigParser {
         maxBlacklistedDamage = 100;
         List<String> standStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-below");
         List<String> inStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-in");
-        List<String> bypassStringList = NerfFarms.plugin.getConfig().getStringList("bypass");
-        List<String> spawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-spawn-types");
+        List<String> whitelistedMobStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-mobs");
+        List<String> blacklistedMobStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-mobs");
+        List<String> whitelistedSpawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-spawn-reasons");
+        List<String> blacklistedSpawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-spawn-reasons");
         List<String> blacklistedDamageTypesList = NerfFarms.plugin.getConfig().getStringList("blacklisted-damage-types");
         int maxDistanceInt = NerfFarms.plugin.getConfig().getInt("max-distance");
         int maxBlacklistedDamageConfig = NerfFarms.plugin.getConfig().getInt("max-blacklisted-damage-percent");
@@ -65,8 +69,27 @@ public class ConfigParser {
             }
         }
 
-        // Mob Bypass
-        for (String type : bypassStringList) {
+        // Mob Whitelist
+        for (String type : whitelistedMobStringList) {
+            if (type == null || type.equalsIgnoreCase("")) break;
+            try {
+                EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            } catch (IllegalArgumentException e) {
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
+                errorCount = errorCount + 1;
+                continue;
+            }
+            EntityType entityType = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            if (entityType.isAlive()) {
+                whitelistedMobList.add(entityType);
+            } else {
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
+                errorCount = errorCount + 1;
+            }
+        }
+
+        // Mob Blacklist
+        for (String type : blacklistedMobStringList) {
             if (type == null || type.equalsIgnoreCase("")) break;
             try {
                 EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
@@ -77,23 +100,37 @@ public class ConfigParser {
             }
             EntityType entityType = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             if (entityType.isAlive()) {
-                bypassList.add(entityType);
+                blacklistedMobList.add(entityType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity for bypass. Please choose another.");
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
                 errorCount = errorCount + 1;
             }
         }
 
         // Generate Spawn Reasons
-        for (String type : spawnReasonStringList) {
+        for (String type : whitelistedSpawnReasonStringList) {
+            if (type == null || type.equalsIgnoreCase("")) break;
             try {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason. Please check that you have entered this correctly.");
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason (whitelisted-spawn-reasons). Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
-            spawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
+            whitelistedSpawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
+        }
+
+        // Generate Spawn Reasons
+        for (String type : blacklistedSpawnReasonStringList) {
+            if (type == null || type.equalsIgnoreCase("")) break;
+            try {
+                CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
+            } catch (IllegalArgumentException e) {
+                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason (blacklisted-spawn-reasons). Please check that you have entered this correctly.");
+                errorCount = errorCount + 1;
+                continue;
+            }
+            blacklistedSpawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
         }
         // Generate Environmental Causes
         for (String type : blacklistedDamageTypesList) {
@@ -137,15 +174,21 @@ public class ConfigParser {
         return Collections.unmodifiableSet(insideBlacklist);
     }
 
-    public static Set<EntityType> getBypassList() {
-        return Collections.unmodifiableSet(bypassList);
+    public static Set<EntityType> getWhitelistedMobList() {
+        return Collections.unmodifiableSet(whitelistedMobList);
+    }
+    public static Set<EntityType> getBlacklistedMobList() {
+        return Collections.unmodifiableSet(blacklistedMobList);
     }
 
-    public static Set<CreatureSpawnEvent.SpawnReason> getSpawnReasonList() {
-        return Collections.unmodifiableSet(spawnReasonList);
+    public static Set<CreatureSpawnEvent.SpawnReason> getWhitelistedSpawnReasonList() {
+        return Collections.unmodifiableSet(whitelistedSpawnReasonList);
+    }
+    public static Set<CreatureSpawnEvent.SpawnReason> getBlacklistedSpawnReasonList() {
+        return Collections.unmodifiableSet(blacklistedSpawnReasonList);
     }
 
-    public static Set<EntityDamageEvent.DamageCause> getblacklistedDamageTypesSet() {
+    public static Set<EntityDamageEvent.DamageCause> getBlacklistedDamageTypesSet() {
         return Collections.unmodifiableSet(blacklistedDamageTypes);
     }
 
