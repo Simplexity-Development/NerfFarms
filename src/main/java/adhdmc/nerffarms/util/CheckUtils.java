@@ -42,7 +42,8 @@ public class CheckUtils {
     public static Material getBlockAbove(Location location, Entity entity){
         double entityHeight = entity.getHeight();
         if (entityHeight > 1) {
-            location = location.add(0, (entityHeight - 1), 0);
+            int addToLoc = (int) Math.round(entityHeight - 1);
+            location = location.add(0, addToLoc, 0);
         }
         NerfFarms.debugLvl3("getBlockAbove: MaterialType " + location.getBlock().getType() + "\nLocation: " + location);
         return location.getBlock().getType();

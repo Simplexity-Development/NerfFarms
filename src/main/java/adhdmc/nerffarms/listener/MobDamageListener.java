@@ -416,7 +416,8 @@ public class MobDamageListener implements Listener {
         double entityHeight = entity.getHeight();
         Location entityLocation;
         if (entityHeight > 1) {
-          entityLocation = entity.getLocation().add(0, (entityHeight - 1), 0);
+            int addToLoc = (int) Math.round(entityHeight - 1);
+            entityLocation = entity.getLocation().add(0, addToLoc, 0);
         } else {
             entityLocation = entity.getLocation();
         }
