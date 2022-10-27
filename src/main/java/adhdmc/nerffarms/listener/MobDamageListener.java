@@ -378,7 +378,7 @@ public class MobDamageListener implements Listener {
             checkDamageThreshold(mobPDC, entity);
             return true;
         }
-        if (!CheckUtils.getBlockAbove(pathPoints.get(2), entity).isPassable()) {
+        if (pathLength >= 3 && !CheckUtils.getBlockAbove(pathPoints.get(2), entity).isPassable()) {
             NerfFarms.debugLvl2("Entity does not have a path to the player (3rd path point is blocked). Returning true");
             addPDCDamage(event, mobPDC, hitDamage);
             checkDamageThreshold(mobPDC, entity);
