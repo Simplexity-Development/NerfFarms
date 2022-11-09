@@ -319,6 +319,10 @@ public class MobDamageListener implements Listener {
     private boolean checkDamager(EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         NerfFarms.debugLvl1("Performing checkDamager on " + entity.getName());
         Entity damager = CheckUtils.getRealDamager(event);
+        if (damager instanceof IronGolem && ConfigToggle.ALLOW_IRON_GOLEM_DAMAGE.isEnabled()) {
+            NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Iron golems can damage entities' is 'true'. Returning true");
+            return true;
+        }
         if (damager instanceof Wither && ConfigToggle.ALLOW_WITHER_DAMAGE.isEnabled()) {
             NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'. Returning true");
             return true;
@@ -326,6 +330,16 @@ public class MobDamageListener implements Listener {
         if (damager instanceof AbstractSkeleton && entity instanceof Creeper && ConfigToggle.ALLOW_SKELETON_CREEPER_DAMAGE.isEnabled()) {
             NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Skeletons can damage creepers' is 'true'. Returning true (non-projectile damage)");
             return true;
+        }
+        if (damager instanceof Frog && entity instanceof Slime slimeEntity) {
+            if (slimeEntity.getType().equals(EntityType.MAGMA_CUBE) && ConfigToggle.ALLOW_FROG_MAGMA_CUBE_DAMAGE.isEnabled()) {
+                NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'frogs can eat magma cubes' is 'true'. Returning true");
+                return true;
+            }
+            if (slimeEntity.getType().equals(EntityType.SLIME) && ConfigToggle.ALLOW_FROG_SLIME_DAMAGE.isEnabled()) {
+                NerfFarms.debugLvl2("Skipping nerf on " + entity.getName() + "because 'frogs can eat slime' is 'true'. Returning true");
+                return true;
+            }
         }
         if (!(damager instanceof Player)) {
             NerfFarms.debugLvl1("Damager is not a player, returning true");

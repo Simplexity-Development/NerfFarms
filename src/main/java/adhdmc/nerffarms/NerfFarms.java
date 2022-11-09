@@ -67,6 +67,9 @@ public final class NerfFarms extends JavaPlugin {
         config.addDefault("require-line-of-sight", true);
         config.addDefault("skeletons-can-damage-creepers", true);
         config.addDefault("withers-can-damage-entities", true);
+        config.addDefault("frogs-can-eat-slimes", true);
+        config.addDefault("frogs-can-eat-magma-cubes", true);
+        config.addDefault("iron-golems-can-damage-entities", false);
         config.addDefault("max-total-distance", 15);
         config.addDefault("blacklisted-damage-types", Arrays.asList("BLOCK_EXPLOSION", "CONTACT", "CRAMMING",
         "DRAGON_BREATH", "DROWNING", "DRYOUT", "FALL", "FALLING_BLOCK", "FIRE", "FIRE_TICK", "FREEZE", "HOT_FLOOR",
