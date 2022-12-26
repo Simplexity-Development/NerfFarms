@@ -4,6 +4,7 @@ import adhdmc.nerffarms.NerfFarms;
 import adhdmc.nerffarms.config.ConfigParser;
 import adhdmc.nerffarms.config.ConfigToggle;
 import adhdmc.nerffarms.util.CheckUtils;
+import adhdmc.nerffarms.util.Util;
 import com.destroystokyo.paper.entity.Pathfinder;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,8 +23,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class MobDamageListener implements Listener {
-    public static final NamespacedKey nerfMob = new NamespacedKey(NerfFarms.plugin, "nerf-mob");
-    public static final NamespacedKey blacklistedDamage = new NamespacedKey(NerfFarms.plugin, "blacklisted-damage");
+    private final NamespacedKey nerfMob = Util.nerfMob;
+    public static final NamespacedKey blacklistedDamage = Util.blacklistedDamage;
     private static final byte t = 1;
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

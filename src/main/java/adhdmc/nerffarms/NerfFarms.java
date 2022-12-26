@@ -2,6 +2,7 @@ package adhdmc.nerffarms;
 
 import adhdmc.nerffarms.command.CommandHandler;
 import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.listener.ItemPickupListener;
 import adhdmc.nerffarms.listener.MobDamageListener;
 import adhdmc.nerffarms.listener.MobDeathListener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -41,6 +42,7 @@ public final class NerfFarms extends JavaPlugin {
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         this.getServer().getPluginManager().registerEvents(new MobDamageListener(), this);
+        this.getServer().getPluginManager().registerEvents(new ItemPickupListener(), this);
         registerCommand(this.getCommand("nerffarms"), new CommandHandler());
     }
 
