@@ -2,7 +2,6 @@ package adhdmc.nerffarms.util;
 
 import java.util.*;
 
-import adhdmc.nerffarms.NerfFarms;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +46,7 @@ public class LocationMath {
         for (int x = -r; x <= r; x++) {
             for (int z = -r; z <= r; z++) {
                 locations.add(loc.add(x, 0, z));
-                NerfFarms.debugLvl3("Added location" );
+                Util.debugLvl3("Added location" );
             }
         }
         return locations;

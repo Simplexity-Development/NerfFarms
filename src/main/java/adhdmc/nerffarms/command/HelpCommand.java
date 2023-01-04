@@ -1,7 +1,7 @@
 package adhdmc.nerffarms.command;
 
-import adhdmc.nerffarms.NerfFarms;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import adhdmc.nerffarms.util.NFMessage;
+import adhdmc.nerffarms.util.NFPerm;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -11,30 +11,20 @@ public class HelpCommand extends SubCommand {
 
 
     public HelpCommand() {
-        super("help", "NerfMobs help", CommandHandler.helpCommand);
+        super("help", "NerfMobs help", "/nerffarms help");
     }
 
     @Override
-    public void doThing(CommandSender sender, String[] args) {
-        if (sender instanceof Player player && sender.hasPermission("nerffarms.commands")) {
-            player.sendMessage(NerfFarms.plugin.miniMessage.deserialize(
-                    "<grey>• <aqua><click:suggest_command:'<help>'>" +
-                            "<hover:show_text:'<yellow><help>'>/nerffarms help" +
-                            "</hover></click></aqua> - <dark_aqua>shows this list",
-                    Placeholder.unparsed("help", CommandHandler.helpCommand)));
-            player.sendMessage(NerfFarms.plugin.miniMessage.deserialize(
-                    "<grey>• <aqua><click:suggest_command:'<reload>'>" +
-                            "<hover:show_text:'<yellow><reload>'>/nerffarms reload" +
-                            "</hover></click></aqua> - <dark_aqua>reloads the NerfFarms config",
-                    Placeholder.unparsed("reload", CommandHandler.reloadCommand)));
+    public void execute(CommandSender sender, String[] args) {
+        if (sender instanceof Player player && sender.hasPermission(NFPerm.NF_COMMANDS.getPerm())) {
+            player.sendMessage(NFMessage.HELP.getMessage());
             return;
         }
         if (sender instanceof Player player) {
-            player.sendMessage(NerfFarms.plugin.miniMessage.deserialize(CommandHandler.noPermission));
+            player.sendRichMessage(NFMessage.NO_PERMISSION.getMessage());
             return;
         }
-        sender.sendMessage(CommandHandler.helpCommand);
-        sender.sendMessage(CommandHandler.reloadCommand);
+        sender.sendRichMessage(NFMessage.HELP.getMessage());
     }
 
     @Override

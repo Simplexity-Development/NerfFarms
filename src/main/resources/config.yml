@@ -33,6 +33,8 @@ frogs-can-eat-slimes: true
 
 frogs-can-eat-magma-cubes: true
 
+drop-player-items: true
+
 #[DROPS|EXP|BOTH|NEITHER]
 
 modification-type: "BOTH"
