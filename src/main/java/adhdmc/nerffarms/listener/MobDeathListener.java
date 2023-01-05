@@ -53,10 +53,11 @@ public class MobDeathListener implements Listener {
         List<ItemStack> drops = deathEvent.getDrops();
         List<ItemStack> pickedUpItems = new ArrayList<>();
         for (ItemStack item : drops) {
-            Util.debugLvl3("Item in inventory: " + item.toString() + "\n");
+            Util.debugLvl3("Item in inventory: " + item.toString());
             ItemMeta itemMeta = item.getItemMeta();
             PersistentDataContainer itemPDC = itemMeta.getPersistentDataContainer();
-            Util.debugLvl3("ItemPDC output: " + itemPDC.get(pickedUp, PersistentDataType.BYTE));
+            Util.debugLvl3("ItemPDC output: " + itemPDC.get(pickedUp, PersistentDataType.BYTE)
+                    + "\nKeys: " + itemPDC.getKeys());
             if (itemPDC.get(pickedUp, PersistentDataType.BYTE) != null) {
                 pickedUpItems.add(item);
                 Util.debugLvl3("Adding item to items that should drop.");

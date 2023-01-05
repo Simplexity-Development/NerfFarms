@@ -19,12 +19,13 @@ public class ItemPickupListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onItemPickup(EntityPickupItemEvent pickupEvent) {
         byte t = 1;
-        if (!(pickupEvent.getEntity() instanceof Mob)) return;
+        if (!(pickupEvent.getEntity() instanceof Mob mob)) return;
         ItemStack item = pickupEvent.getItem().getItemStack();
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer itemPDC = meta.getPersistentDataContainer();
         itemPDC.set(pickedUp, PersistentDataType.BYTE, t);
         item.setItemMeta(meta);
-        Util.debugLvl3("Item meta, item picked up: " + item.getItemMeta().getPersistentDataContainer().get(pickedUp, PersistentDataType.BYTE));
+        pickupEvent.getItem().setItemStack(item);
+        Util.debugLvl3("Item meta, item picked up: " + pickupEvent.getItem().getItemStack().getItemMeta().getPersistentDataContainer().get(pickedUp, PersistentDataType.BYTE));
     }
 }
