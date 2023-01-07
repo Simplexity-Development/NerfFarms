@@ -33,8 +33,6 @@ frogs-can-eat-slimes: true
 
 frogs-can-eat-magma-cubes: true
 
-drop-player-items: true
-
 #[DROPS|EXP|BOTH|NEITHER]
 
 modification-type: "BOTH"
@@ -72,6 +70,8 @@ whitelisted-spawn-reasons:
 
 blacklisted-spawn-reasons:
 #- SPAWNER
+blacklisted-pickups-mob:
+#- ZOMBIE
 
 blacklisted-below:
 - MAGMA_BLOCK

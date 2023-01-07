@@ -1,6 +1,7 @@
 package adhdmc.nerffarms.config;
 
 import adhdmc.nerffarms.NerfFarms;
+import it.unimi.dsi.fastutil.Hash;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -16,6 +17,7 @@ public class ConfigParser {
     private static final HashSet<CreatureSpawnEvent.SpawnReason> whitelistedSpawnReasonList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> blacklistedSpawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
+    private static final HashSet<EntityType> blacklistedPickupMobs = new HashSet<>();
     private static int maxDistance = 0;
     private static int errorCount = 0;
     private static int maxBlacklistedDamage = 100;
@@ -31,6 +33,7 @@ public class ConfigParser {
         whitelistedSpawnReasonList.clear();
         blacklistedSpawnReasonList.clear();
         blacklistedDamageTypes.clear();
+        blacklistedPickupMobs.clear();
         maxDistance = 0;
         errorCount = 0;
         debug = 0;
@@ -42,6 +45,7 @@ public class ConfigParser {
         List<String> whitelistedSpawnReasonStringList = NerfFarms.getInstance().getConfig().getStringList("whitelisted-spawn-reasons");
         List<String> blacklistedSpawnReasonStringList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-spawn-reasons");
         List<String> blacklistedDamageTypesList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-damage-types");
+        List<String> blacklistedPickupMobsList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-pickups-mob");
         int maxDistanceInt = NerfFarms.getInstance().getConfig().getInt("max-distance");
         int maxBlacklistedDamageConfig = NerfFarms.getInstance().getConfig().getInt("max-blacklisted-damage-percent");
         debug = NerfFarms.getInstance().getConfig().getInt("debug");
@@ -131,6 +135,23 @@ public class ConfigParser {
             }
             blacklistedSpawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
         }
+        for (String type : blacklistedPickupMobsList) {
+            if (type == null || type.equalsIgnoreCase("")) break;
+            try {
+                EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            } catch (IllegalArgumentException e) {
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                errorCount = errorCount + 1;
+                continue;
+            }
+            EntityType entityType = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            if (entityType.isAlive()) {
+                blacklistedPickupMobs.add(entityType);
+            } else {
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                errorCount = errorCount + 1;
+            }
+        }
         // Generate Environmental Causes
         for (String type : blacklistedDamageTypesList) {
             try {
@@ -189,6 +210,10 @@ public class ConfigParser {
 
     public static Set<EntityDamageEvent.DamageCause> getBlacklistedDamageTypesSet() {
         return Collections.unmodifiableSet(blacklistedDamageTypes);
+    }
+
+    public static HashSet<EntityType> getBlacklistedPickupMobs() {
+        return blacklistedPickupMobs;
     }
 
     /**

@@ -33,5 +33,6 @@ public class Defaults {
                 "LAVA", "LIGHTNING", "SUFFOCATION", "SUICIDE"));
         config.addDefault("max-blacklisted-damage-percent", 75);
         config.addDefault("drop-player-items", true);
+        config.addDefault("blacklisted-pickups-mob", List.of(""));
     }
 }
