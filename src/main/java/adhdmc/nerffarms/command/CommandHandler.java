@@ -1,6 +1,9 @@
 package adhdmc.nerffarms.command;
 
 import adhdmc.nerffarms.NerfFarms;
+import adhdmc.nerffarms.util.NFMessage;
+import adhdmc.nerffarms.util.NFPerm;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,13 +19,8 @@ import java.util.List;
 
 public class CommandHandler implements CommandExecutor, TabExecutor {
 
-    public static final String helpCommand = "/nerffarms help";
-    public static final String reloadCommand = "/nerffarms reload";
-    public static final String commandsPermission = "nerffarms.commands";
-    public static final String reloadPermission = "nerffarms.reload";
-    public static final String noPermission = "<red>You do not have permission to run this command!";
-
     private static final HashMap<String, SubCommand> subcommandList = new HashMap<>();
+    MiniMessage miniMessage = NerfFarms.getMiniMessage();
 
     public static void registerCommands() {
         CommandHandler.subcommandList.put("help", new HelpCommand());
@@ -32,7 +30,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         ArrayList<String> subCommands1 = new ArrayList<>(Arrays.asList("help", "reload"));
-        if (args.length == 1 && sender.hasPermission(commandsPermission)) {
+        if (args.length == 1 && sender.hasPermission(NFPerm.NF_COMMANDS.getPerm())) {
             return subCommands1;
         }
         return null;
@@ -40,22 +38,22 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
-        if (sender instanceof Player && !sender.hasPermission(commandsPermission)) {
-            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize(noPermission));
+        if (sender instanceof Player && !sender.hasPermission(NFPerm.NF_COMMANDS.getPerm())) {
+            sender.sendRichMessage(NFMessage.NO_PERMISSION.getMessage());
             return false;
         }
         if (args.length == 0) {
-            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<click:open_url:'https://github.com/ADHDMC/NerfFarms'><gray><hover:show_text:'<aqua>Click to visit the GitHub repository'><green>NerfFarms</green> <white>|</white> Version: <green><version></green>\n<desc>\nAuthors: <green><author></hover></click>",
-                    Placeholder.unparsed("author",  NerfFarms.plugin.getDescription().getAuthors().toString()),
-                    Placeholder.unparsed("version", NerfFarms.plugin.getDescription().getVersion()),
-                    Placeholder.unparsed("desc", NerfFarms.plugin.getDescription().getDescription())));
+            sender.sendMessage(miniMessage.deserialize(NFMessage.PLUGIN_INFO.getMessage(),
+                    Placeholder.unparsed("author",  NerfFarms.getInstance().getDescription().getAuthors().toString()),
+                    Placeholder.unparsed("version", NerfFarms.getInstance().getDescription().getVersion()),
+                    Placeholder.unparsed("desc", NerfFarms.getInstance().getDescription().getDescription())));
             return true;
         }
         String command = args[0].toLowerCase();
         if (subcommandList.containsKey(command)) {
-            subcommandList.get(command).doThing(sender, Arrays.copyOfRange(args, 1, args.length));
+            subcommandList.get(command).execute(sender, Arrays.copyOfRange(args, 1, args.length));
         } else {
-            sender.sendMessage(NerfFarms.plugin.miniMessage.deserialize("<red><hover:show_text:'<gray>/nerffarms help'><click:suggest_command:'/nerffarms help'>Sorry! You input the command incorrectly. Please use /nerffarms help to see all commands.</click></hover>"));
+            sender.sendRichMessage(NFMessage.INCORRECT_INPUT.getMessage());
         }
         return true;
     }

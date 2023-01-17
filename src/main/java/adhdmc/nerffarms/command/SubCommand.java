@@ -28,7 +28,7 @@ public abstract class SubCommand {
         return syntax;
     }
 
-    public abstract void doThing(CommandSender sender, String[] args);
+    public abstract void execute(CommandSender sender, String[] args);
 
     public abstract List<String> getSubcommandArguments(CommandSender sender, String[] args);
 

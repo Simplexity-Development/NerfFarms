@@ -1,4 +1,4 @@
-package adhdmc.nerffarms.config;
+package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
 import org.bukkit.Material;
@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.*;
 
-public class ConfigParser {
+public class NFConfig {
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> whitelistedMobList = new HashSet<>();
@@ -16,9 +16,10 @@ public class ConfigParser {
     private static final HashSet<CreatureSpawnEvent.SpawnReason> whitelistedSpawnReasonList = new HashSet<>();
     private static final HashSet<CreatureSpawnEvent.SpawnReason> blacklistedSpawnReasonList = new HashSet<>();
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
+    private static final HashSet<EntityType> blacklistedPickupMobs = new HashSet<>();
     private static int maxDistance = 0;
+    private static int maxHeightDifference;
     private static int errorCount = 0;
-
     private static int maxBlacklistedDamage = 100;
     private static int debug = 0;
 
@@ -32,20 +33,24 @@ public class ConfigParser {
         whitelistedSpawnReasonList.clear();
         blacklistedSpawnReasonList.clear();
         blacklistedDamageTypes.clear();
+        blacklistedPickupMobs.clear();
         maxDistance = 0;
+        maxHeightDifference = 0;
         errorCount = 0;
         debug = 0;
         maxBlacklistedDamage = 100;
-        List<String> standStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-below");
-        List<String> inStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-in");
-        List<String> whitelistedMobStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-mobs");
-        List<String> blacklistedMobStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-mobs");
-        List<String> whitelistedSpawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("whitelisted-spawn-reasons");
-        List<String> blacklistedSpawnReasonStringList = NerfFarms.plugin.getConfig().getStringList("blacklisted-spawn-reasons");
-        List<String> blacklistedDamageTypesList = NerfFarms.plugin.getConfig().getStringList("blacklisted-damage-types");
-        int maxDistanceInt = NerfFarms.plugin.getConfig().getInt("max-distance");
-        int maxBlacklistedDamageConfig = NerfFarms.plugin.getConfig().getInt("max-blacklisted-damage-percent");
-        debug = NerfFarms.plugin.getConfig().getInt("debug");
+        List<String> standStringList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-below");
+        List<String> inStringList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-in");
+        List<String> whitelistedMobStringList = NerfFarms.getInstance().getConfig().getStringList("whitelisted-mobs");
+        List<String> blacklistedMobStringList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-mobs");
+        List<String> whitelistedSpawnReasonStringList = NerfFarms.getInstance().getConfig().getStringList("whitelisted-spawn-reasons");
+        List<String> blacklistedSpawnReasonStringList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-spawn-reasons");
+        List<String> blacklistedDamageTypesList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-damage-types");
+        List<String> blacklistedPickupMobsList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-pickups-mob");
+        int maxDistanceInt = NerfFarms.getInstance().getConfig().getInt("max-distance");
+        int maxHeightDifferenceInt = NerfFarms.getInstance().getConfig().getInt("max-height-difference");
+        int maxBlacklistedDamageConfig = NerfFarms.getInstance().getConfig().getInt("max-blacklisted-damage-percent");
+        debug = NerfFarms.getInstance().getConfig().getInt("debug");
 
         // Assemble the Stand On BlackList
         for (String type : standStringList) {
@@ -53,7 +58,7 @@ public class ConfigParser {
             if (materialType != null && materialType.isBlock()) {
                 standOnBlacklist.add(materialType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to stand on, please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid block for mobs to stand on, please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -64,7 +69,7 @@ public class ConfigParser {
             if (materialType != null && materialType.isBlock()) {
                 insideBlacklist.add(materialType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid block for mobs to be inside, please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -75,7 +80,7 @@ public class ConfigParser {
             try {
                 EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -83,7 +88,7 @@ public class ConfigParser {
             if (entityType.isAlive()) {
                 whitelistedMobList.add(entityType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to whitelist. Please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -94,7 +99,7 @@ public class ConfigParser {
             try {
                 EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -102,7 +107,7 @@ public class ConfigParser {
             if (entityType.isAlive()) {
                 blacklistedMobList.add(entityType);
             } else {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
                 errorCount = errorCount + 1;
             }
         }
@@ -113,7 +118,7 @@ public class ConfigParser {
             try {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason (whitelisted-spawn-reasons). Please check that you have entered this correctly.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid spawn reason (whitelisted-spawn-reasons). Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -126,18 +131,35 @@ public class ConfigParser {
             try {
                 CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH));
             } catch (IllegalArgumentException e) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid spawn reason (blacklisted-spawn-reasons). Please check that you have entered this correctly.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid spawn reason (blacklisted-spawn-reasons). Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
             blacklistedSpawnReasonList.add(CreatureSpawnEvent.SpawnReason.valueOf(type.toUpperCase(Locale.ENGLISH)));
+        }
+        for (String type : blacklistedPickupMobsList) {
+            if (type == null || type.equalsIgnoreCase("")) break;
+            try {
+                EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            } catch (IllegalArgumentException e) {
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                errorCount = errorCount + 1;
+                continue;
+            }
+            EntityType entityType = EntityType.valueOf(type.toUpperCase(Locale.ENGLISH));
+            if (entityType.isAlive()) {
+                blacklistedPickupMobs.add(entityType);
+            } else {
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid entity to blacklist. Please choose another.");
+                errorCount = errorCount + 1;
+            }
         }
         // Generate Environmental Causes
         for (String type : blacklistedDamageTypesList) {
             try {
                 EntityDamageEvent.DamageCause.valueOf(type);
             } catch (IllegalArgumentException exception) {
-                NerfFarms.plugin.getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
+                NerfFarms.getInstance().getLogger().warning(type + " is not a valid damage type. Please check that you have entered this correctly.");
                 errorCount = errorCount + 1;
                 continue;
             }
@@ -148,22 +170,31 @@ public class ConfigParser {
 
         // Determine Distance
         if (!(maxDistanceInt > 1 && maxDistanceInt < 120)) {
-            NerfFarms.plugin.getLogger().warning("Max player distance must be between 1 and 120, setting distance to 20");
+            NerfFarms.getInstance().getLogger().warning("Max player distance must be between 1 and 120, setting distance to 20");
             errorCount = errorCount + 1;
             maxDistance = 20;
         } else {
             maxDistance = maxDistanceInt;
         }
 
+        // Determine height difference
+        if (!(maxHeightDifferenceInt >= 0)) {
+            NerfFarms.getInstance().getLogger().warning("Max height difference must be a positive integer. Setting to 10");
+            errorCount = errorCount + 1;
+            maxHeightDifference = 10;
+        } else {
+            maxHeightDifference = maxHeightDifferenceInt;
+        }
+
         // Determine Percent Damage from Environment
         if (maxBlacklistedDamageConfig <= 0 || maxBlacklistedDamageConfig > 100) {
-            NerfFarms.plugin.getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
+            NerfFarms.getInstance().getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
             errorCount = errorCount + 1;
             maxBlacklistedDamage = 100;
         } else {
             maxBlacklistedDamage = maxBlacklistedDamageConfig;
         }
-        ConfigToggle.reloadToggles();
+        NFToggles.reloadToggles();
     }
 
     public static Set<Material> getStandOnBlackList() {
@@ -192,6 +223,10 @@ public class ConfigParser {
         return Collections.unmodifiableSet(blacklistedDamageTypes);
     }
 
+    public static HashSet<EntityType> getBlacklistedPickupMobs() {
+        return blacklistedPickupMobs;
+    }
+
     /**
      * Returns the modType setting, defining if EXP and/or Drops should be cleared.
      *
@@ -200,6 +235,10 @@ public class ConfigParser {
 
     public static int getMaxDistance() {
         return maxDistance;
+    }
+
+    public static int getMaxHeightDifference() {
+        return maxHeightDifference;
     }
 
     public static int getErrorCount() {

@@ -1,33 +1,27 @@
 package adhdmc.nerffarms;
 
 import adhdmc.nerffarms.command.CommandHandler;
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
+import adhdmc.nerffarms.util.Defaults;
 import adhdmc.nerffarms.listener.ItemPickupListener;
-import adhdmc.nerffarms.listener.MobDamageListener;
+import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.listener.MobDeathListener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Arrays;
-import java.util.List;
 
 public final class NerfFarms extends JavaPlugin {
     //TODO: Add config for a message that is sent to the player when the mob they kill is nerfed
     //TODO: Add a toggle command for that message
     //TODO: Add a config option for allowing non-player kills (checkDamager method in MobDamageListener)
-    //TODO: Add configuration for max height diff between mob and attacker
-    //TODO: Move permissions to an Enum
-    //TODO: Move messages to an Enum
-    public static NerfFarms plugin;
-    public final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private static NerfFarms instance;
+    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     @Override
     public void onEnable() {
-        plugin = this;
+        instance = this;
         try {
             Class.forName("net.kyori.adventure.text.minimessage.MiniMessage");
             Class.forName("com.destroystokyo.paper.entity.Pathfinder");
@@ -35,13 +29,13 @@ public final class NerfFarms extends JavaPlugin {
             this.getLogger().severe("NerfFarms relies on methods in classes not present on your server. Disabling plugin");
             this.getServer().getPluginManager().disablePlugin(this);
         }
-        configDefaults();
-        ConfigParser.validateConfig();
+        Defaults.configDefaults();
+        NFConfig.validateConfig();
         CommandHandler.registerCommands();
         Metrics metrics = new Metrics(this, 16509);
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
-        this.getServer().getPluginManager().registerEvents(new MobDamageListener(), this);
+        this.getServer().getPluginManager().registerEvents(new DamageListener(), this);
         this.getServer().getPluginManager().registerEvents(new ItemPickupListener(), this);
         registerCommand(this.getCommand("nerffarms"), new CommandHandler());
     }
@@ -52,60 +46,11 @@ public final class NerfFarms extends JavaPlugin {
         }
     }
 
-    private void configDefaults() {
-        FileConfiguration config = getConfig();
-        config.addDefault("debug", 0);
-        config.addDefault("only-nerf-hostiles", true);
-        config.addDefault("whitelisted-mobs", List.of(""));
-        config.addDefault("blacklisted-mobs", List.of(""));
-        config.addDefault("modification-type", "BOTH");
-        config.addDefault("whitelisted-spawn-reasons", List.of("CUSTOM"));
-        config.addDefault("blacklisted-spawn-reasons", List.of(""));
-        config.addDefault("blacklisted-below", Arrays.asList("MAGMA_BLOCK", "HONEY_BLOCK", "LAVA"));
-        config.addDefault("blacklisted-in", Arrays.asList("HONEY_BLOCK", "LAVA", "BUBBLE_COLUMN"));
-        config.addDefault("allow-projectile-damage", true);
-        config.addDefault("require-path", true);
-        config.addDefault("require-open-surroundings", true);
-        config.addDefault("require-line-of-sight", true);
-        config.addDefault("skeletons-can-damage-creepers", true);
-        config.addDefault("withers-can-damage-entities", true);
-        config.addDefault("frogs-can-eat-slimes", true);
-        config.addDefault("frogs-can-eat-magma-cubes", true);
-        config.addDefault("iron-golems-can-damage-entities", false);
-        config.addDefault("max-total-distance", 15);
-        config.addDefault("blacklisted-damage-types", Arrays.asList("BLOCK_EXPLOSION", "CONTACT", "CRAMMING",
-        "DRAGON_BREATH", "DROWNING", "DRYOUT", "FALL", "FALLING_BLOCK", "FIRE", "FIRE_TICK", "FREEZE", "HOT_FLOOR",
-        "LAVA", "LIGHTNING", "SUFFOCATION", "SUICIDE"));
-        config.addDefault("max-blacklisted-damage-percent", 75);
+    public static NerfFarms getInstance() {
+        return instance;
     }
 
-    /**
-     * Used for the beginning of method calls
-     * @param message Debug Message String
-     */
-    public static void debugLvl1(String message) {
-        if (ConfigParser.debugLevel() == 1 || ConfigParser.debugLevel() == 4) {
-            plugin.getLogger().info(message);
-        }
-    }
-
-    /**
-     * Used for return statements, and their explanations
-     * @param message Debug Message String
-     */
-    public static void debugLvl2(String message){
-        if (ConfigParser.debugLevel() == 2 || ConfigParser.debugLevel() == 4) {
-            plugin.getLogger().info(message);
-        }
-    }
-
-    /**
-     * Used for methods that are called in assistance to other methods
-     * @param message Debug Message String
-     */
-    public static void debugLvl3(String message){
-        if (ConfigParser.debugLevel() == 3 || ConfigParser.debugLevel() == 4) {
-            plugin.getLogger().info(message);
-        }
+    public static MiniMessage getMiniMessage() {
+        return miniMessage;
     }
 }
