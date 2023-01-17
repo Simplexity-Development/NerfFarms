@@ -17,21 +17,23 @@
 #only change this if asked
 debug: 0
 
+allow-projectile-damage: true
+
+only-nerf-hostiles: true
+
 require-path: true
 
 require-line-of-sight: true
 
-only-nerf-hostiles: true
+frogs-can-eat-slimes: true
 
-allow-projectile-damage: true
+frogs-can-eat-magma-cubes: true
 
 skeletons-can-damage-creepers: true
 
 withers-can-damage-entities: true
 
-frogs-can-eat-slimes: true
-
-frogs-can-eat-magma-cubes: true
+iron-golems-can-damage-entities:
 
 #Conditions where a mob should not be nerfed, even if it was previously marked to be nerfed
 whitelist-mobs-with-weakness: true
@@ -81,6 +83,7 @@ whitelisted-spawn-reasons:
 
 blacklisted-spawn-reasons:
 #- SPAWNER
+
 blacklisted-pickups-mob:
 #- ZOMBIE
 

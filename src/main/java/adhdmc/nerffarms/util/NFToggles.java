@@ -12,7 +12,6 @@ public enum NFToggles {
     ALLOW_IRON_GOLEM_DAMAGE(false),
     //Nerfing checks
     REQUIRE_PATH(true),
-    REQUIRE_OPEN_SURROUNDINGS(true),
     REQUIRE_LINE_OF_SIGHT(true),
     ALLOW_PROJECTILE_DAMAGE(true),
     WHITELIST_WEAKNESS(true),
@@ -41,7 +40,6 @@ public enum NFToggles {
         ALLOW_FROG_MAGMA_CUBE_DAMAGE.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("frogs-can-eat-magma-cubes"));
         ALLOW_IRON_GOLEM_DAMAGE.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("iron-golems-can-damage-entities"));
         REQUIRE_PATH.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("require-path"));
-        REQUIRE_OPEN_SURROUNDINGS.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("require-open-surroundings"));
         REQUIRE_LINE_OF_SIGHT.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("require-line-of-sight"));
         ALLOW_PROJECTILE_DAMAGE.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("allow-projectile-damage"));
         WHITELIST_WEAKNESS.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("whitelist-mobs-with-weakness"));

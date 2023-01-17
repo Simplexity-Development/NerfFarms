@@ -16,3 +16,6 @@ permissions:
   nerffarms.reload:
     description: Allows user to reload the configuration
     default: op
+  nerffarms.bypass:
+    description: Allows a user to bypass nerf checks, allowing mobs to drop all xp and loot on death when killed by the player
+    default: op
