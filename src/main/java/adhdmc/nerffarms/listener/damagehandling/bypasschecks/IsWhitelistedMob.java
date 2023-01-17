@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.bypasschecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -18,7 +18,7 @@ public class IsWhitelistedMob {
      */
     public static boolean isWhitelistedMob(Entity entity, PersistentDataContainer mobPDC, NamespacedKey bypass) {
         Util.debugLvl1("Performing isWhitelistedMob on " + entity.getName());
-        if (ConfigParser.getWhitelistedMobList().contains(entity.getType())) {
+        if (NFConfig.getWhitelistedMobList().contains(entity.getType())) {
             Util.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " is on the Whitelisted Mob list as "
             + entity.getType() + ". Setting mob to bypass future checks. Returning true");
             mobPDC.set(bypass, PersistentDataType.BYTE, DamageListener.t);

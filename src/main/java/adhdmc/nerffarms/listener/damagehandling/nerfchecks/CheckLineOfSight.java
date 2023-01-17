@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigToggle;
+import adhdmc.nerffarms.util.NFToggles;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.CheckUtils;
 import adhdmc.nerffarms.util.Util;
@@ -24,7 +24,7 @@ public class CheckLineOfSight {
     public static boolean checkLineOfSight(NamespacedKey nerfMob, EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Util.debugLvl1("Performing checkLineOfSight on " + entity.getName());
         if (!(entity instanceof LivingEntity)) return true;
-        if (!ConfigToggle.REQUIRE_LINE_OF_SIGHT.isEnabled()) return true;
+        if (!NFToggles.REQUIRE_LINE_OF_SIGHT.isEnabled()) return true;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null) {
             Util.debugLvl2("Mob does not have a viable line-of-sight because 'getRealDamager' has returned a null value. " +

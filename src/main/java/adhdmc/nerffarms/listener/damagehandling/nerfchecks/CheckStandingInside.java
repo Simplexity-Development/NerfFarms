@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.Material;
@@ -23,7 +23,7 @@ public class CheckStandingInside {
     public static boolean checkStandingInside(NamespacedKey nerfMob, EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Util.debugLvl1("Performing checkStandingInside on " + entity.getName());
         Material entityStandingIn = entity.getLocation().getBlock().getType();
-        if (ConfigParser.getInsideBlackList().contains(entityStandingIn)) {
+        if (NFConfig.getInsideBlackList().contains(entityStandingIn)) {
             Util.debugLvl2(entityStandingIn + " is a 'blacklisted-in' block. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

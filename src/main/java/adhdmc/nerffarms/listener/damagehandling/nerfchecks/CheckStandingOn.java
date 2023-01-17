@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.Location;
@@ -25,7 +25,7 @@ public class CheckStandingOn {
         Util.debugLvl1("Performing checkStandingOn on " + entity.getName());
         Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
-        if (ConfigParser.getStandOnBlackList().contains(entityStandingOn)) {
+        if (NFConfig.getStandOnBlackList().contains(entityStandingOn)) {
             Util.debugLvl2(entityStandingOn + " is a 'blacklisted-below' block. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

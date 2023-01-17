@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.bypasschecks;
 
-import adhdmc.nerffarms.config.ConfigToggle;
+import adhdmc.nerffarms.util.NFToggles;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
@@ -14,7 +14,7 @@ public class IsHostileCheck {
      */
     public static boolean checkHostile(Entity entity) {
         Util.debugLvl1("Performing isHostileNerf on " + entity.getName());
-        if (ConfigToggle.ONLY_NERF_HOSTILES.isEnabled() && !(entity instanceof Monster)) {
+        if (NFToggles.ONLY_NERF_HOSTILES.isEnabled() && !(entity instanceof Monster)) {
             Util.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " is not a Monster and Nerf Hostiles Only is True. Returning false");
             return false;
         }

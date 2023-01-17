@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.bypasschecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -16,7 +16,7 @@ public class IsBlacklistedMob {
      */
     public static boolean isBlacklistedMob(NamespacedKey nerfMob, Entity entity) {
         Util.debugLvl1("Performing isWhitelistedMob on " + entity.getName());
-        if (ConfigParser.getBlacklistedMobList().contains(entity.getType())) {
+        if (NFConfig.getBlacklistedMobList().contains(entity.getType())) {
             entity.getPersistentDataContainer().set(nerfMob, PersistentDataType.BYTE, DamageListener.t);
             Util.debugLvl2("Nerfing " + entity.getName() + " Because they are on the blacklisted mob types as "
                     + entity.getType() + ". Nerfing and returning true");

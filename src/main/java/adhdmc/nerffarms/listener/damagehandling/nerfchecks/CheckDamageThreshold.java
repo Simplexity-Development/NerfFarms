@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -20,7 +20,7 @@ public class CheckDamageThreshold {
      * @param entity double Total Damage Dealt
      */
     public static void checkDamageThreshold(NamespacedKey nerfMob, PersistentDataContainer mobPDC, Entity entity) {
-        int maxBlacklistedDamage = ConfigParser.getMaxBlacklistedDamage();
+        int maxBlacklistedDamage = NFConfig.getMaxBlacklistedDamage();
         double nerfedDamage = mobPDC.getOrDefault(DamageListener.blacklistedDamage, PersistentDataType.DOUBLE, 0.0);
         double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
         int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);

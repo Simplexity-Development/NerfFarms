@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -21,7 +21,7 @@ public class CheckDamageType {
      */
     public static boolean checkDamageType(NamespacedKey nerfMob, EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Util.debugLvl1("Performing checkDamageType on " + entity.getName());
-        if (ConfigParser.getBlacklistedDamageTypesSet().contains(event.getCause())) {
+        if (NFConfig.getBlacklistedDamageTypesSet().contains(event.getCause())) {
             Util.debugLvl2(event.getCause() + " is a blacklisted damage type. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

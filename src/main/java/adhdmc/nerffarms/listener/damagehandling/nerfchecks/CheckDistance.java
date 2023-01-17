@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.CheckUtils;
 import adhdmc.nerffarms.util.Util;
@@ -33,9 +33,18 @@ public class CheckDistance {
         }
         Location entityLoc = entity.getLocation();
         Location damagerLoc = damager.getLocation();
+        double entityHeight = entityLoc.getY();
+        double damagerHeight = damagerLoc.getY();
         double distanceBetween = entityLoc.distance(damagerLoc);
-        if (distanceBetween > ConfigParser.getMaxDistance()) {
+        double heightDifference = Math.abs(entityHeight - damagerHeight);
+        if (distanceBetween > NFConfig.getMaxDistance()) {
             Util.debugLvl2(entity.getName() + " is above the max configured distance from the damager. Returning true");
+            AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
+            CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);
+            return true;
+        }
+        if (heightDifference > NFConfig.getMaxHeightDifference()) {
+            Util.debugLvl2(entity.getName() + " is above the max configured height difference from the damager. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);
             return true;

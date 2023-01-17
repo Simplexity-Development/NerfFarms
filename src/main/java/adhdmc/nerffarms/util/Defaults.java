@@ -1,4 +1,4 @@
-package adhdmc.nerffarms.config;
+package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,12 +27,16 @@ public class Defaults {
         config.addDefault("frogs-can-eat-slimes", true);
         config.addDefault("frogs-can-eat-magma-cubes", true);
         config.addDefault("iron-golems-can-damage-entities", false);
-        config.addDefault("max-total-distance", 15);
+        config.addDefault("max-distance", 15);
+        config.addDefault("max-height-difference", 10);
         config.addDefault("blacklisted-damage-types", Arrays.asList("BLOCK_EXPLOSION", "CONTACT", "CRAMMING",
                 "DRAGON_BREATH", "DROWNING", "DRYOUT", "FALL", "FALLING_BLOCK", "FIRE", "FIRE_TICK", "FREEZE", "HOT_FLOOR",
                 "LAVA", "LIGHTNING", "SUFFOCATION", "SUICIDE"));
         config.addDefault("max-blacklisted-damage-percent", 75);
-        config.addDefault("drop-player-items", true);
+        config.addDefault("whitelist-mobs-with-weakness", true);
+        config.addDefault("whitelist-mobs-in-vehicles", false);
+        config.addDefault("whitelist-named-mobs", false);
+        config.addDefault("whitelist-leashed-mobs", true);
         config.addDefault("blacklisted-pickups-mob", List.of(""));
     }
 }

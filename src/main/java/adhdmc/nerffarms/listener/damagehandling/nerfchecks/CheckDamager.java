@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigToggle;
+import adhdmc.nerffarms.util.NFToggles;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.CheckUtils;
 import adhdmc.nerffarms.util.Util;
@@ -26,24 +26,24 @@ public class CheckDamager {
     public static boolean checkDamager(NamespacedKey nerfMob, EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Util.debugLvl1("Performing checkDamager on " + entity.getName());
         Entity damager = CheckUtils.getRealDamager(event);
-        if (damager instanceof IronGolem && ConfigToggle.ALLOW_IRON_GOLEM_DAMAGE.isEnabled()) {
+        if (damager instanceof IronGolem && NFToggles.ALLOW_IRON_GOLEM_DAMAGE.isEnabled()) {
             Util.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Iron golems can damage entities' is 'true'. Returning true");
             return true;
         }
-        if (damager instanceof Wither && ConfigToggle.ALLOW_WITHER_DAMAGE.isEnabled()) {
+        if (damager instanceof Wither && NFToggles.ALLOW_WITHER_DAMAGE.isEnabled()) {
             Util.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Withers can damage entities' is 'true'. Returning true");
             return true;
         }
-        if (damager instanceof AbstractSkeleton && entity instanceof Creeper && ConfigToggle.ALLOW_SKELETON_CREEPER_DAMAGE.isEnabled()) {
+        if (damager instanceof AbstractSkeleton && entity instanceof Creeper && NFToggles.ALLOW_SKELETON_CREEPER_DAMAGE.isEnabled()) {
             Util.debugLvl2("Skipping nerf on " + entity.getName() + "because 'Skeletons can damage creepers' is 'true'. Returning true (non-projectile damage)");
             return true;
         }
         if (damager instanceof Frog && entity instanceof Slime slimeEntity) {
-            if (slimeEntity.getType().equals(EntityType.MAGMA_CUBE) && ConfigToggle.ALLOW_FROG_MAGMA_CUBE_DAMAGE.isEnabled()) {
+            if (slimeEntity.getType().equals(EntityType.MAGMA_CUBE) && NFToggles.ALLOW_FROG_MAGMA_CUBE_DAMAGE.isEnabled()) {
                 Util.debugLvl2("Skipping nerf on " + entity.getName() + "because 'frogs can eat magma cubes' is 'true'. Returning true");
                 return true;
             }
-            if (slimeEntity.getType().equals(EntityType.SLIME) && ConfigToggle.ALLOW_FROG_SLIME_DAMAGE.isEnabled()) {
+            if (slimeEntity.getType().equals(EntityType.SLIME) && NFToggles.ALLOW_FROG_SLIME_DAMAGE.isEnabled()) {
                 Util.debugLvl2("Skipping nerf on " + entity.getName() + "because 'frogs can eat slime' is 'true'. Returning true");
                 return true;
             }

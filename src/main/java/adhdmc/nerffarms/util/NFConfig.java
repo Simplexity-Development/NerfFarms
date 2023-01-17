@@ -1,7 +1,6 @@
-package adhdmc.nerffarms.config;
+package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
-import it.unimi.dsi.fastutil.Hash;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -9,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.*;
 
-public class ConfigParser {
+public class NFConfig {
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> whitelistedMobList = new HashSet<>();
@@ -19,6 +18,7 @@ public class ConfigParser {
     private static final HashSet<EntityDamageEvent.DamageCause> blacklistedDamageTypes = new HashSet<>();
     private static final HashSet<EntityType> blacklistedPickupMobs = new HashSet<>();
     private static int maxDistance = 0;
+    private static int maxHeightDifference;
     private static int errorCount = 0;
     private static int maxBlacklistedDamage = 100;
     private static int debug = 0;
@@ -35,6 +35,7 @@ public class ConfigParser {
         blacklistedDamageTypes.clear();
         blacklistedPickupMobs.clear();
         maxDistance = 0;
+        maxHeightDifference = 0;
         errorCount = 0;
         debug = 0;
         maxBlacklistedDamage = 100;
@@ -47,6 +48,7 @@ public class ConfigParser {
         List<String> blacklistedDamageTypesList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-damage-types");
         List<String> blacklistedPickupMobsList = NerfFarms.getInstance().getConfig().getStringList("blacklisted-pickups-mob");
         int maxDistanceInt = NerfFarms.getInstance().getConfig().getInt("max-distance");
+        int maxHeightDifferenceInt = NerfFarms.getInstance().getConfig().getInt("max-height-difference");
         int maxBlacklistedDamageConfig = NerfFarms.getInstance().getConfig().getInt("max-blacklisted-damage-percent");
         debug = NerfFarms.getInstance().getConfig().getInt("debug");
 
@@ -175,6 +177,15 @@ public class ConfigParser {
             maxDistance = maxDistanceInt;
         }
 
+        // Determine height difference
+        if (!(maxHeightDifferenceInt >= 0)) {
+            NerfFarms.getInstance().getLogger().warning("Max height difference must be a positive integer. Setting to 10");
+            errorCount = errorCount + 1;
+            maxHeightDifference = 10;
+        } else {
+            maxHeightDifference = maxHeightDifferenceInt;
+        }
+
         // Determine Percent Damage from Environment
         if (maxBlacklistedDamageConfig <= 0 || maxBlacklistedDamageConfig > 100) {
             NerfFarms.getInstance().getLogger().warning("Percent damage from Environment must be between 1 and 100, setting to 100");
@@ -183,7 +194,7 @@ public class ConfigParser {
         } else {
             maxBlacklistedDamage = maxBlacklistedDamageConfig;
         }
-        ConfigToggle.reloadToggles();
+        NFToggles.reloadToggles();
     }
 
     public static Set<Material> getStandOnBlackList() {
@@ -224,6 +235,10 @@ public class ConfigParser {
 
     public static int getMaxDistance() {
         return maxDistance;
+    }
+
+    public static int getMaxHeightDifference() {
+        return maxHeightDifference;
     }
 
     public static int getErrorCount() {

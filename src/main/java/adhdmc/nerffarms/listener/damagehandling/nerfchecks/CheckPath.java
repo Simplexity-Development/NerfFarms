@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.nerfchecks;
 
-import adhdmc.nerffarms.config.ConfigToggle;
+import adhdmc.nerffarms.util.NFToggles;
 import adhdmc.nerffarms.listener.damagehandling.AddPDCDamage;
 import adhdmc.nerffarms.util.CheckUtils;
 import adhdmc.nerffarms.util.Util;
@@ -28,7 +28,7 @@ public class CheckPath {
      */
     public static boolean checkPath(NamespacedKey nerfMob, EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Util.debugLvl1("Performing checkPath on " + entity.getName());
-        if (!ConfigToggle.REQUIRE_PATH.isEnabled()) return false;
+        if (!NFToggles.REQUIRE_PATH.isEnabled()) return false;
         if (!(entity instanceof LivingEntity)) return false;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null){

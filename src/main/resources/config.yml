@@ -33,11 +33,22 @@ frogs-can-eat-slimes: true
 
 frogs-can-eat-magma-cubes: true
 
+#Conditions where a mob should not be nerfed, even if it was previously marked to be nerfed
+whitelist-mobs-with-weakness: true
+
+whitelist-mobs-in-vehicles: false
+
+whitelist-named-mobs: false
+
+whitelist-leashed-mobs: true
+
 #[DROPS|EXP|BOTH|NEITHER]
 
 modification-type: "BOTH"
 
 max-distance: 15
+
+max-height-difference: 10
 
 max-blacklisted-damage-percent: 75
 

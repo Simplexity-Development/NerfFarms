@@ -1,7 +1,6 @@
 package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
-import adhdmc.nerffarms.config.ConfigParser;
 
 public class Util {
     /**
@@ -9,7 +8,7 @@ public class Util {
      * @param message Debug Message String
      */
     public static void debugLvl1(String message) {
-        if (ConfigParser.debugLevel() == 1 || ConfigParser.debugLevel() == 4) {
+        if (NFConfig.debugLevel() == 1 || NFConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }
@@ -19,7 +18,7 @@ public class Util {
      * @param message Debug Message String
      */
     public static void debugLvl2(String message){
-        if (ConfigParser.debugLevel() == 2 || ConfigParser.debugLevel() == 4) {
+        if (NFConfig.debugLevel() == 2 || NFConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }
@@ -29,7 +28,7 @@ public class Util {
      * @param message Debug Message String
      */
     public static void debugLvl3(String message){
-        if (ConfigParser.debugLevel() == 3 || ConfigParser.debugLevel() == 4) {
+        if (NFConfig.debugLevel() == 3 || NFConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }

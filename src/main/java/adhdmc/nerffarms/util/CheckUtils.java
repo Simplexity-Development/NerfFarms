@@ -1,6 +1,5 @@
 package adhdmc.nerffarms.util;
 
-import adhdmc.nerffarms.config.ConfigToggle;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -26,7 +25,7 @@ public class CheckUtils {
             Util.debugLvl2("getRealDamager check, damage was not done by a projectile or a living entity. Returning null");
             return null;
         }
-        if (!ConfigToggle.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
+        if (!NFToggles.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
             Util.debugLvl2("getRealDamager check, damage was done by a projectile, and projectile damage configured off. Returning null");
             return null;
         }

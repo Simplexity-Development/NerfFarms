@@ -1,8 +1,8 @@
 package adhdmc.nerffarms;
 
 import adhdmc.nerffarms.command.CommandHandler;
-import adhdmc.nerffarms.config.ConfigParser;
-import adhdmc.nerffarms.config.Defaults;
+import adhdmc.nerffarms.util.NFConfig;
+import adhdmc.nerffarms.util.Defaults;
 import adhdmc.nerffarms.listener.ItemPickupListener;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.listener.MobDeathListener;
@@ -16,7 +16,6 @@ public final class NerfFarms extends JavaPlugin {
     //TODO: Add config for a message that is sent to the player when the mob they kill is nerfed
     //TODO: Add a toggle command for that message
     //TODO: Add a config option for allowing non-player kills (checkDamager method in MobDamageListener)
-    //TODO: Add configuration for max height diff between mob and attacker
     private static NerfFarms instance;
     private static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -31,7 +30,7 @@ public final class NerfFarms extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
         }
         Defaults.configDefaults();
-        ConfigParser.validateConfig();
+        NFConfig.validateConfig();
         CommandHandler.registerCommands();
         Metrics metrics = new Metrics(this, 16509);
         this.saveDefaultConfig();

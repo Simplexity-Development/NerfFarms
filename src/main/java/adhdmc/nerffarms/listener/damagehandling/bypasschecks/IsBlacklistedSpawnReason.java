@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.bypasschecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -16,7 +16,7 @@ public class IsBlacklistedSpawnReason {
      */
     public static boolean isBlacklistedSpawnReason(NamespacedKey nerfMob, Entity entity) {
         Util.debugLvl1("Performing isBlacklistedSpawnReason on " + entity.getName());
-        if (ConfigParser.getBlacklistedSpawnReasonList().contains(entity.getEntitySpawnReason())) {
+        if (NFConfig.getBlacklistedSpawnReasonList().contains(entity.getEntitySpawnReason())) {
             entity.getPersistentDataContainer().set(nerfMob, PersistentDataType.BYTE, DamageListener.t);
             Util.debugLvl2("Nerfing " + entity.getName() + " because they spawned with the spawn reason "
                     + entity.getEntitySpawnReason() + " which is blacklisted. Setting mob as nerfed. Returning true");

@@ -1,8 +1,8 @@
-package adhdmc.nerffarms.config;
+package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
 
-public enum ConfigToggle {
+public enum NFToggles {
     //Bypass toggles
     ONLY_NERF_HOSTILES(true),
     ALLOW_SKELETON_CREEPER_DAMAGE(true),
@@ -15,10 +15,13 @@ public enum ConfigToggle {
     REQUIRE_OPEN_SURROUNDINGS(true),
     REQUIRE_LINE_OF_SIGHT(true),
     ALLOW_PROJECTILE_DAMAGE(true),
-    DROP_PLAYER_ITEMS(true);
+    WHITELIST_WEAKNESS(true),
+    WHITELIST_VEHICLES(false),
+    WHITELIST_NAMED(false),
+    WHITELIST_LEASHED(true);
 
     boolean toggle;
-    ConfigToggle(boolean toggle){
+    NFToggles(boolean toggle){
         this.toggle = toggle;
     }
 
@@ -41,6 +44,9 @@ public enum ConfigToggle {
         REQUIRE_OPEN_SURROUNDINGS.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("require-open-surroundings"));
         REQUIRE_LINE_OF_SIGHT.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("require-line-of-sight"));
         ALLOW_PROJECTILE_DAMAGE.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("allow-projectile-damage"));
-        DROP_PLAYER_ITEMS.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("drop-player-items"));
+        WHITELIST_WEAKNESS.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("whitelist-mobs-with-weakness"));
+        WHITELIST_VEHICLES.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("whitelist-mobs-in-vehicles"));
+        WHITELIST_NAMED.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("whitelist-named-mobs"));
+        WHITELIST_LEASHED.setEnabled(NerfFarms.getInstance().getConfig().getBoolean("whitelist-leashed-mobs"));
     }
 }

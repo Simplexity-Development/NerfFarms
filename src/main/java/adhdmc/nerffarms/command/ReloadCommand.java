@@ -1,8 +1,8 @@
 package adhdmc.nerffarms.command;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.NerfFarms;
-import adhdmc.nerffarms.config.ModType;
+import adhdmc.nerffarms.util.ModType;
 import adhdmc.nerffarms.util.NFMessage;
 import adhdmc.nerffarms.util.NFPerm;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -26,10 +26,10 @@ public class ReloadCommand extends SubCommand {
         if (!(sender instanceof Player) || sender.hasPermission(NFPerm.NF_RELOAD.getPerm())) {
             NerfFarms.getInstance().reloadConfig();
             NerfFarms.getInstance().saveConfig();
-            ConfigParser.validateConfig();
+            NFConfig.validateConfig();
             sender.sendRichMessage(NFMessage.PLUGIN_RELOADED.getMessage());
-            if (ConfigParser.getErrorCount() > 0) {
-                sender.sendMessage(NerfFarms.getMiniMessage().deserialize(NFMessage.PLUGIN_RELOADED_WITH_ERRORS.getMessage(), Placeholder.unparsed("errors", String.valueOf(ConfigParser.getErrorCount()))));
+            if (NFConfig.getErrorCount() > 0) {
+                sender.sendMessage(NerfFarms.getMiniMessage().deserialize(NFMessage.PLUGIN_RELOADED_WITH_ERRORS.getMessage(), Placeholder.unparsed("errors", String.valueOf(NFConfig.getErrorCount()))));
             }
             if (ModType.getModType() == ModType.NEITHER) {
                 sender.sendRichMessage(NFMessage.PLUGIN_USELESS.getMessage());

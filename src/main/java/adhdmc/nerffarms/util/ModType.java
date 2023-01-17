@@ -1,4 +1,4 @@
-package adhdmc.nerffarms.config;
+package adhdmc.nerffarms.util;
 
 import adhdmc.nerffarms.NerfFarms;
 

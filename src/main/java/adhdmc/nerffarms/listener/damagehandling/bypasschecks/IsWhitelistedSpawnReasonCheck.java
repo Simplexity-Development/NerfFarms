@@ -1,6 +1,6 @@
 package adhdmc.nerffarms.listener.damagehandling.bypasschecks;
 
-import adhdmc.nerffarms.config.ConfigParser;
+import adhdmc.nerffarms.util.NFConfig;
 import adhdmc.nerffarms.listener.damagehandling.DamageListener;
 import adhdmc.nerffarms.util.Util;
 import org.bukkit.NamespacedKey;
@@ -18,7 +18,7 @@ public class IsWhitelistedSpawnReasonCheck {
      */
     public static boolean isWhitelistedSpawnReason(PersistentDataContainer mobPDC, Entity entity, NamespacedKey bypass) {
         Util.debugLvl1("Performing isWhitelistedSpawnReason on " + entity.getName());
-        if (ConfigParser.getWhitelistedSpawnReasonList().contains(entity.getEntitySpawnReason())) {
+        if (NFConfig.getWhitelistedSpawnReasonList().contains(entity.getEntitySpawnReason())) {
             Util.debugLvl2("Ignoring onMobDamage because " + entity.getName() + " spawned from "
             + entity.getEntitySpawnReason() + " which is whitelisted. Marking to skip future checks and returning true");
             mobPDC.set(bypass, PersistentDataType.BYTE, DamageListener.t);
