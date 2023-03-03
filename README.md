@@ -1,4 +1,4 @@
-# <img src="https://github.com/ADHDMC/.github/blob/main/pictures/nerf-farms-logo.png?raw=true" width="75" height="75"> NerfFarms
+# <img src="https://github.com/ADHDMC/.github/blob/main/pictures/logos/nerf-farms-logo.png?raw=true" width="75" height="75"> NerfFarms
 
 [![Ko-Fi Support Link](https://img.shields.io/badge/Ko--fi-donate-FF5E5B?logo=ko-fi)](https://ko-fi.com/illogicalrhythmic)
 [![wakatime](https://wakatime.com/badge/user/bf4f6f62-0e88-4b6f-8363-aac43611fe08/project/bcf0c9a5-da39-4756-898e-74ac8876a921.svg?style=flat)](https://wakatime.com/badge/user/bf4f6f62-0e88-4b6f-8363-aac43611fe08/project/bcf0c9a5-da39-4756-898e-74ac8876a921)
@@ -21,9 +21,6 @@ You can also control
 - [ ] Add config for a message that is sent to the player when the mob they kill is nerfed
 - [ ] Add a toggle command for that message
 - [ ] Add a config option for allowing non-player kills (checkDamager method in MobDamageListener)
-- [ ] Add configuration for max height diff between mob and attacker
-- [ ] Move permissions to an Enum
-- [ ] Move messages to an Enum
 
 > **Warning**
 > 
