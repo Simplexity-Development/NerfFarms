@@ -1,9 +1,9 @@
 name: NerfFarms
 version: '${project.version}'
-main: adhdmc.nerffarms.NerfFarms
+main: simplexity.nerffarms.NerfFarms
 api-version: 1.19
 author: Rhythmic, Peashooter101
-website: https://github.com/ADHDMC/NerfFarms
+website: https://github.com/Simplexity-Development/NerfFarms
 description: Allows greater control over farming on your server
 commands:
   nerffarms:
