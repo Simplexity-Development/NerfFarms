@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.DamageListener;
 import simplexity.nerffarms.util.Debug;
 import org.bukkit.NamespacedKey;
@@ -20,7 +20,7 @@ public class CheckDamageThreshold {
      * @param entity double Total Damage Dealt
      */
     public static void checkDamageThreshold(NamespacedKey nerfMob, PersistentDataContainer mobPDC, Entity entity) {
-        int maxBlacklistedDamage = NFConfig.getMaxBlacklistedDamage();
+        int maxBlacklistedDamage = NerfFarmsConfig.getMaxBlacklistedDamage();
         double nerfedDamage = mobPDC.getOrDefault(DamageListener.blacklistedDamage, PersistentDataType.DOUBLE, 0.0);
         double maxHealth = Objects.requireNonNull(((Mob) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
         int percentDamage = (int) ((nerfedDamage / maxHealth) * 100);

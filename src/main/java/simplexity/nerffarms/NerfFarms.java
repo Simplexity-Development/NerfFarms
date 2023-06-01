@@ -1,8 +1,7 @@
 package simplexity.nerffarms;
 
 import simplexity.nerffarms.command.CommandHandler;
-import simplexity.nerffarms.util.NFConfig;
-import simplexity.nerffarms.util.Defaults;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.ItemPickupListener;
 import simplexity.nerffarms.listener.damagehandling.DamageListener;
 import simplexity.nerffarms.listener.MobDeathListener;
@@ -29,11 +28,11 @@ public final class NerfFarms extends JavaPlugin {
             this.getLogger().severe("NerfFarms relies on methods in classes not present on your server. Disabling plugin");
             this.getServer().getPluginManager().disablePlugin(this);
         }
-        Defaults.configDefaults();
-        NFConfig.validateConfig();
         CommandHandler.registerCommands();
-        Metrics metrics = new Metrics(this, 16509);
+        //TODO BSTATS (previously was a maven project, need to figure out gradle import)
+        //Metrics metrics = new Metrics(this, 16509);
         this.saveDefaultConfig();
+        NerfFarmsConfig.validateConfig();
         this.getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         this.getServer().getPluginManager().registerEvents(new DamageListener(), this);
         this.getServer().getPluginManager().registerEvents(new ItemPickupListener(), this);

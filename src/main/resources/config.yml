@@ -25,6 +25,8 @@ require-path: true
 
 require-line-of-sight: true
 
+ignore-mobs-attacking-mobs: true
+
 frogs-can-eat-slimes: true
 
 frogs-can-eat-magma-cubes: true

@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.Debug;
 import org.bukkit.NamespacedKey;
@@ -21,7 +21,7 @@ public class CheckDamageType {
      */
     public static boolean checkDamageType(NamespacedKey nerfMob, EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Debug.debugLvl1("Performing checkDamageType on " + entity.getName());
-        if (NFConfig.getBlacklistedDamageTypesSet().contains(event.getCause())) {
+        if (NerfFarmsConfig.getBlacklistedDamageTypesSet().contains(event.getCause())) {
             Debug.debugLvl2(event.getCause() + " is a blacklisted damage type. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

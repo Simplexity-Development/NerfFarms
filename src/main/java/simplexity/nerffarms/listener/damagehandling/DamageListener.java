@@ -9,17 +9,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.persistence.PersistentDataContainer;
 import simplexity.nerffarms.events.MobValidationEvent;
 import simplexity.nerffarms.listener.damagehandling.bypasschecks.*;
 import simplexity.nerffarms.listener.damagehandling.nerfchecks.*;
-import simplexity.nerffarms.util.NFKey;
+import simplexity.nerffarms.util.NerfFarmsNamespacedKey;
 import simplexity.nerffarms.util.Debug;
 
 public class DamageListener implements Listener {
-    private final NamespacedKey nerfMob = NFKey.NERF_MOB.getKey();
-    private final NamespacedKey bypassEntity = NFKey.BYPASS_MOB.getKey();
-    public static final NamespacedKey blacklistedDamage = NFKey.BLACKLISTED_DAMAGE.getKey();
+    private final NamespacedKey nerfMob = NerfFarmsNamespacedKey.NERF_MOB.getKey();
+    private final NamespacedKey bypassEntity = NerfFarmsNamespacedKey.BYPASS_MOB.getKey();
+    public static final NamespacedKey blacklistedDamage = NerfFarmsNamespacedKey.BLACKLISTED_DAMAGE.getKey();
     public static final byte t = 1;
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

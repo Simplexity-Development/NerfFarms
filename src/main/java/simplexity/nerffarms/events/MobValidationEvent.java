@@ -10,9 +10,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import simplexity.nerffarms.listener.damagehandling.DamageListener;
 import simplexity.nerffarms.util.Debug;
-import simplexity.nerffarms.util.NFConfig;
-import simplexity.nerffarms.util.NFKey;
-import simplexity.nerffarms.util.NFToggles;
+import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.util.NerfFarmsNamespacedKey;
+import simplexity.nerffarms.util.ConfigToggle;
 
 /**
  * This class checks for anything that should end the checks early
@@ -20,8 +20,8 @@ import simplexity.nerffarms.util.NFToggles;
 public class MobValidationEvent extends Event implements Cancellable {
     private boolean cancelled;
     private static final HandlerList handlers = new HandlerList();
-    private final NamespacedKey nerfOnDeath = NFKey.NERF_MOB.getKey();
-    private final NamespacedKey bypassChecks = NFKey.BYPASS_MOB.getKey();
+    private final NamespacedKey nerfOnDeath = NerfFarmsNamespacedKey.NERF_MOB.getKey();
+    private final NamespacedKey bypassChecks = NerfFarmsNamespacedKey.BYPASS_MOB.getKey();
     private final org.bukkit.entity.LivingEntity bukkitLivingEntity;
 
     public MobValidationEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity){
@@ -37,7 +37,7 @@ public class MobValidationEvent extends Event implements Cancellable {
             setCancelled(true);
             return;
         }
-        if (!isHostile() && NFToggles.ONLY_NERF_HOSTILES.isEnabled()) {
+        if (!isHostile() && ConfigToggle.ONLY_NERF_HOSTILES.isEnabled()) {
             setCancelled(true);
             return;
         }
@@ -104,7 +104,7 @@ public class MobValidationEvent extends Event implements Cancellable {
      */
     public boolean isWhitelistedMob() {
         Debug.debugLvl1("Performing isWhitelistedMob on " + bukkitLivingEntity.getName());
-        if (NFConfig.getWhitelistedMobList().contains(bukkitLivingEntity.getType())) {
+        if (NerfFarmsConfig.getWhitelistedMobList().contains(bukkitLivingEntity.getType())) {
             Debug.debugLvl2("Ignoring onMobDamage because " + bukkitLivingEntity.getName() + " is on the Whitelisted Mob list as "
                     + bukkitLivingEntity.getType() + ". Setting mob to bypass future checks. Returning true");
             getLivingEntityPDC().set(bypassChecks, PersistentDataType.BYTE, (byte) 1);
@@ -120,7 +120,7 @@ public class MobValidationEvent extends Event implements Cancellable {
      */
     public boolean isWhitelistedSpawnReason() {
         Debug.debugLvl1("Performing isWhitelistedSpawnReason on " + bukkitLivingEntity.getName());
-        if (NFConfig.getWhitelistedSpawnReasonList().contains(bukkitLivingEntity.getEntitySpawnReason())) {
+        if (NerfFarmsConfig.getWhitelistedSpawnReasonList().contains(bukkitLivingEntity.getEntitySpawnReason())) {
             Debug.debugLvl2("Ignoring onMobDamage because " + bukkitLivingEntity.getName() + " spawned from "
                     + bukkitLivingEntity.getEntitySpawnReason() + " which is whitelisted. Marking to skip future checks and returning true");
             getLivingEntityPDC().set(bypassChecks, PersistentDataType.BYTE, (byte) 1);
@@ -136,7 +136,7 @@ public class MobValidationEvent extends Event implements Cancellable {
      */
     public boolean isBlacklistedMob() {
         Debug.debugLvl1("Performing isBlacklistedMob on " + bukkitLivingEntity.getName());
-        if (NFConfig.getBlacklistedMobList().contains(bukkitLivingEntity.getType())) {
+        if (NerfFarmsConfig.getBlacklistedMobList().contains(bukkitLivingEntity.getType())) {
             bukkitLivingEntity.getPersistentDataContainer().set(nerfOnDeath, PersistentDataType.BYTE, DamageListener.t);
             Debug.debugLvl2("Nerfing " + bukkitLivingEntity.getName() + " Because they are on the blacklisted mob types as "
                     + bukkitLivingEntity.getType() + ". Nerfing and returning true");
@@ -152,7 +152,7 @@ public class MobValidationEvent extends Event implements Cancellable {
      */
     public boolean isBlacklistedSpawnReason() {
         Debug.debugLvl1("Performing isBlacklistedSpawnReason on " + bukkitLivingEntity.getName());
-        if (NFConfig.getBlacklistedSpawnReasonList().contains(bukkitLivingEntity.getEntitySpawnReason())) {
+        if (NerfFarmsConfig.getBlacklistedSpawnReasonList().contains(bukkitLivingEntity.getEntitySpawnReason())) {
             bukkitLivingEntity.getPersistentDataContainer().set(nerfOnDeath, PersistentDataType.BYTE, (byte) 1);
             Debug.debugLvl2("Nerfing " + bukkitLivingEntity.getName() + " because they spawned with the spawn reason "
                     + bukkitLivingEntity.getEntitySpawnReason() + " which is blacklisted. Setting mob as nerfed. Returning true");

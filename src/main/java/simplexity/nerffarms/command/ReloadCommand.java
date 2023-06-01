@@ -1,9 +1,9 @@
 package simplexity.nerffarms.command;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.NerfFarms;
 import simplexity.nerffarms.util.ModType;
-import simplexity.nerffarms.util.NFMessage;
+import simplexity.nerffarms.util.Message;
 import simplexity.nerffarms.util.NFPerm;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
@@ -20,19 +20,19 @@ public class ReloadCommand extends SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof Player && !sender.hasPermission(NFPerm.NF_RELOAD.getPerm())) {
-            sender.sendRichMessage(NFMessage.NO_PERMISSION.getMessage());
+            sender.sendRichMessage(Message.NO_PERMISSION.getMessage());
             return;
         }
         if (!(sender instanceof Player) || sender.hasPermission(NFPerm.NF_RELOAD.getPerm())) {
             NerfFarms.getInstance().reloadConfig();
             NerfFarms.getInstance().saveConfig();
-            NFConfig.validateConfig();
-            sender.sendRichMessage(NFMessage.PLUGIN_RELOADED.getMessage());
-            if (NFConfig.getErrorCount() > 0) {
-                sender.sendMessage(NerfFarms.getMiniMessage().deserialize(NFMessage.PLUGIN_RELOADED_WITH_ERRORS.getMessage(), Placeholder.unparsed("errors", String.valueOf(NFConfig.getErrorCount()))));
+            NerfFarmsConfig.validateConfig();
+            sender.sendRichMessage(Message.PLUGIN_RELOADED.getMessage());
+            if (NerfFarmsConfig.getErrorCount() > 0) {
+                sender.sendMessage(NerfFarms.getMiniMessage().deserialize(Message.PLUGIN_RELOADED_WITH_ERRORS.getMessage(), Placeholder.unparsed("errors", String.valueOf(NerfFarmsConfig.getErrorCount()))));
             }
             if (ModType.getModType() == ModType.NEITHER) {
-                sender.sendRichMessage(NFMessage.PLUGIN_USELESS.getMessage());
+                sender.sendRichMessage(Message.PLUGIN_USELESS.getMessage());
             }
         }
     }

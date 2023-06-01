@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.CheckUtils;
 import simplexity.nerffarms.util.Debug;
@@ -37,13 +37,13 @@ public class CheckDistance {
         double damagerHeight = damagerLoc.getY();
         double distanceBetween = entityLoc.distance(damagerLoc);
         double heightDifference = Math.abs(entityHeight - damagerHeight);
-        if (distanceBetween > NFConfig.getMaxDistance()) {
+        if (distanceBetween > NerfFarmsConfig.getMaxDistance()) {
             Debug.debugLvl2(entity.getName() + " is above the max configured distance from the damager. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);
             return true;
         }
-        if (heightDifference > NFConfig.getMaxHeightDifference()) {
+        if (heightDifference > NerfFarmsConfig.getMaxHeightDifference()) {
             Debug.debugLvl2(entity.getName() + " is above the max configured height difference from the damager. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

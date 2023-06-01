@@ -1,7 +1,7 @@
 package simplexity.nerffarms.command;
 
 import simplexity.nerffarms.NerfFarms;
-import simplexity.nerffarms.util.NFMessage;
+import simplexity.nerffarms.util.Message;
 import simplexity.nerffarms.util.NFPerm;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -39,11 +39,11 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         if (sender instanceof Player && !sender.hasPermission(NFPerm.NF_COMMANDS.getPerm())) {
-            sender.sendRichMessage(NFMessage.NO_PERMISSION.getMessage());
+            sender.sendRichMessage(Message.NO_PERMISSION.getMessage());
             return false;
         }
         if (args.length == 0) {
-            sender.sendMessage(miniMessage.deserialize(NFMessage.PLUGIN_INFO.getMessage(),
+            sender.sendMessage(miniMessage.deserialize(Message.PLUGIN_INFO.getMessage(),
                     Placeholder.unparsed("author",  NerfFarms.getInstance().getDescription().getAuthors().toString()),
                     Placeholder.unparsed("version", NerfFarms.getInstance().getDescription().getVersion()),
                     Placeholder.unparsed("desc", NerfFarms.getInstance().getDescription().getDescription())));
@@ -53,7 +53,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
         if (subcommandList.containsKey(command)) {
             subcommandList.get(command).execute(sender, Arrays.copyOfRange(args, 1, args.length));
         } else {
-            sender.sendRichMessage(NFMessage.INCORRECT_INPUT.getMessage());
+            sender.sendRichMessage(Message.INCORRECT_INPUT.getMessage());
         }
         return true;
     }

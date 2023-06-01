@@ -1,6 +1,6 @@
 package simplexity.nerffarms.util;
 
-public enum NFMessage {
+public enum Message {
     PLUGIN_RELOADED("<gold>NerfFarms has been reloaded!"),
     PLUGIN_RELOADED_WITH_ERRORS("<red>Your config had <errors> error(s). Check your console for details."),
     PLUGIN_USELESS("<red>Your config does not modify mob drops or exp, this can be due to an error with the modification-type setting or it was set to neither!\n<gold>This plugin will do nothing in this state."),
@@ -12,7 +12,7 @@ public enum NFMessage {
                 <gray>Reloads the NerfFarms config file""");
     String message;
 
-    NFMessage(String message) {
+    Message(String message) {
         this.message = message;
     }
 

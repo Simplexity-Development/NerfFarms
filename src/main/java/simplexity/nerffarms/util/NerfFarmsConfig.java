@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.*;
 
-public class NFConfig {
+public class NerfFarmsConfig {
     private static final HashSet<Material> standOnBlacklist = new HashSet<>();
     private static final HashSet<Material> insideBlacklist = new HashSet<>();
     private static final HashSet<EntityType> whitelistedMobList = new HashSet<>();
@@ -194,7 +194,7 @@ public class NFConfig {
         } else {
             maxBlacklistedDamage = maxBlacklistedDamageConfig;
         }
-        NFToggles.reloadToggles();
+        ConfigToggle.reloadToggles();
     }
 
     public static Set<Material> getStandOnBlackList() {

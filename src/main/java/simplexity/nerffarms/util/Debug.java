@@ -8,7 +8,7 @@ public class Debug {
      * @param message Debug Message String
      */
     public static void debugLvl1(String message) {
-        if (NFConfig.debugLevel() == 1 || NFConfig.debugLevel() == 4) {
+        if (NerfFarmsConfig.debugLevel() == 1 || NerfFarmsConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }
@@ -18,7 +18,7 @@ public class Debug {
      * @param message Debug Message String
      */
     public static void debugLvl2(String message){
-        if (NFConfig.debugLevel() == 2 || NFConfig.debugLevel() == 4) {
+        if (NerfFarmsConfig.debugLevel() == 2 || NerfFarmsConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }
@@ -28,7 +28,7 @@ public class Debug {
      * @param message Debug Message String
      */
     public static void debugLvl3(String message){
-        if (NFConfig.debugLevel() == 3 || NFConfig.debugLevel() == 4) {
+        if (NerfFarmsConfig.debugLevel() == 3 || NerfFarmsConfig.debugLevel() == 4) {
             NerfFarms.getInstance().getLogger().info(message);
         }
     }

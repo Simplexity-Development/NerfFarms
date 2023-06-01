@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.Debug;
 import org.bukkit.Location;
@@ -25,7 +25,7 @@ public class CheckStandingOn {
         Debug.debugLvl1("Performing checkStandingOn on " + entity.getName());
         Location mobStandingOnLocation = entity.getLocation().subtract(0, 1, 0);
         Material entityStandingOn = mobStandingOnLocation.getBlock().getType();
-        if (NFConfig.getStandOnBlackList().contains(entityStandingOn)) {
+        if (NerfFarmsConfig.getStandOnBlackList().contains(entityStandingOn)) {
             Debug.debugLvl2(entityStandingOn + " is a 'blacklisted-below' block. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

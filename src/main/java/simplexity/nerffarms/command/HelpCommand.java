@@ -1,6 +1,6 @@
 package simplexity.nerffarms.command;
 
-import simplexity.nerffarms.util.NFMessage;
+import simplexity.nerffarms.util.Message;
 import simplexity.nerffarms.util.NFPerm;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,14 +17,14 @@ public class HelpCommand extends SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof Player player && sender.hasPermission(NFPerm.NF_COMMANDS.getPerm())) {
-            player.sendMessage(NFMessage.HELP.getMessage());
+            player.sendMessage(Message.HELP.getMessage());
             return;
         }
         if (sender instanceof Player player) {
-            player.sendRichMessage(NFMessage.NO_PERMISSION.getMessage());
+            player.sendRichMessage(Message.NO_PERMISSION.getMessage());
             return;
         }
-        sender.sendRichMessage(NFMessage.HELP.getMessage());
+        sender.sendRichMessage(Message.HELP.getMessage());
     }
 
     @Override

@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFConfig;
+import simplexity.nerffarms.util.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.Debug;
 import org.bukkit.Material;
@@ -23,7 +23,7 @@ public class CheckStandingInside {
     public static boolean checkStandingInside(NamespacedKey nerfMob, EntityDamageEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Debug.debugLvl1("Performing checkStandingInside on " + entity.getName());
         Material entityStandingIn = entity.getLocation().getBlock().getType();
-        if (NFConfig.getInsideBlackList().contains(entityStandingIn)) {
+        if (NerfFarmsConfig.getInsideBlackList().contains(entityStandingIn)) {
             Debug.debugLvl2(entityStandingIn + " is a 'blacklisted-in' block. Returning true");
             AddPDCDamage.addPDCDamage(event, mobPDC, hitDamage);
             CheckDamageThreshold.checkDamageThreshold(nerfMob, mobPDC, entity);

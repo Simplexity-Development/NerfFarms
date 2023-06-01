@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFToggles;
+import simplexity.nerffarms.util.ConfigToggle;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.CheckUtils;
 import simplexity.nerffarms.util.Debug;
@@ -24,7 +24,7 @@ public class CheckLineOfSight {
     public static boolean checkLineOfSight(NamespacedKey nerfMob, EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Debug.debugLvl1("Performing checkLineOfSight on " + entity.getName());
         if (!(entity instanceof LivingEntity)) return true;
-        if (!NFToggles.REQUIRE_LINE_OF_SIGHT.isEnabled()) return true;
+        if (!ConfigToggle.REQUIRE_LINE_OF_SIGHT.isEnabled()) return true;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null) {
             Debug.debugLvl2("Mob does not have a viable line-of-sight because 'getRealDamager' has returned a null value. " +

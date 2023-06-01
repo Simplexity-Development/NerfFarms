@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NFToggles;
+import simplexity.nerffarms.util.ConfigToggle;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.CheckUtils;
 import simplexity.nerffarms.util.Debug;
@@ -28,7 +28,7 @@ public class CheckPath {
      */
     public static boolean checkPath(NamespacedKey nerfMob, EntityDamageByEntityEvent event, Entity entity, PersistentDataContainer mobPDC, double hitDamage) {
         Debug.debugLvl1("Performing checkPath on " + entity.getName());
-        if (!NFToggles.REQUIRE_PATH.isEnabled()) return false;
+        if (!ConfigToggle.REQUIRE_PATH.isEnabled()) return false;
         if (!(entity instanceof LivingEntity)) return false;
         Entity damager = CheckUtils.getRealDamager(event);
         if (damager == null){

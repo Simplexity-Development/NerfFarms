@@ -25,7 +25,7 @@ public class CheckUtils {
             Debug.debugLvl2("getRealDamager check, damage was not done by a projectile or a living entity. Returning null");
             return null;
         }
-        if (!NFToggles.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
+        if (!ConfigToggle.ALLOW_PROJECTILE_DAMAGE.isEnabled()){
             Debug.debugLvl2("getRealDamager check, damage was done by a projectile, and projectile damage configured off. Returning null");
             return null;
         }

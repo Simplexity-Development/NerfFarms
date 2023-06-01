@@ -12,26 +12,26 @@ import org.bukkit.potion.PotionEffectType;
 import simplexity.nerffarms.util.*;
 
 public class MobDeathListener implements Listener {
-    private final NamespacedKey nerfMob = NFKey.NERF_MOB.getKey();
-    private final NamespacedKey pickedUp = NFKey.PICKED_UP_ITEM.getKey();
+    private final NamespacedKey nerfMob = NerfFarmsNamespacedKey.NERF_MOB.getKey();
+    private final NamespacedKey pickedUp = NerfFarmsNamespacedKey.PICKED_UP_ITEM.getKey();
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMobDeath(EntityDeathEvent deathEvent) {
         LivingEntity deadMob = deathEvent.getEntity();
         PersistentDataContainer mobPDC = deadMob.getPersistentDataContainer();
-        if ((deadMob.customName() != null) && NFToggles.WHITELIST_NAMED.isEnabled()) {
+        if ((deadMob.customName() != null) && ConfigToggle.WHITELIST_NAMED.isEnabled()) {
             Debug.debugLvl2("Mob is named, and named mobs have been whitelisted. Returning without nerfing, regardless of nerf status");
             return;
         }
-        if (deadMob.isInsideVehicle() && NFToggles.WHITELIST_VEHICLES.isEnabled()) {
+        if (deadMob.isInsideVehicle() && ConfigToggle.WHITELIST_VEHICLES.isEnabled()) {
             Debug.debugLvl2("Mob is in a vehicle and mobs in vehicles are whitelisted. Returning without nerfing, regardlist of nerf status");
             return;
         }
-        if (deadMob.hasPotionEffect(PotionEffectType.WEAKNESS) && NFToggles.WHITELIST_WEAKNESS.isEnabled()) {
+        if (deadMob.hasPotionEffect(PotionEffectType.WEAKNESS) && ConfigToggle.WHITELIST_WEAKNESS.isEnabled()) {
             Debug.debugLvl2("Mob has weakness and mobs with weakness are whitelisted. Returning without nerfing regardless of nerf status");
             return;
         }
-        if (deadMob.isLeashed() && NFToggles.WHITELIST_LEASHED.isEnabled()) {
+        if (deadMob.isLeashed() && ConfigToggle.WHITELIST_LEASHED.isEnabled()) {
             Debug.debugLvl2("Mob is leashed and leashed mobs are whitelisted. Returning without nerfing regardless of nerf status");
             return;
         }
