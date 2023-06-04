@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.potion.PotionEffectType;
+import simplexity.nerffarms.config.ConfigToggle;
 import simplexity.nerffarms.util.*;
 
 public class MobDeathListener implements Listener {

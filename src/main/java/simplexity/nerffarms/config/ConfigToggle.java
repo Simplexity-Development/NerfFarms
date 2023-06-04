@@ -1,4 +1,4 @@
-package simplexity.nerffarms.util;
+package simplexity.nerffarms.config;
 
 import simplexity.nerffarms.NerfFarms;
 

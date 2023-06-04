@@ -1,4 +1,4 @@
-package simplexity.nerffarms.util;
+package simplexity.nerffarms.config;
 
 public enum Message {
     PLUGIN_RELOADED("<gold>NerfFarms has been reloaded!"),

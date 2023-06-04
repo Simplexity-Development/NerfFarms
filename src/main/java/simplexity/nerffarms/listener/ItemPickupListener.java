@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener;
 
-import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 import simplexity.nerffarms.util.NerfFarmsNamespacedKey;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.EntityType;

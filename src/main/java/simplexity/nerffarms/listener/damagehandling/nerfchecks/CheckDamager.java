@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.ConfigToggle;
+import simplexity.nerffarms.config.ConfigToggle;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.CheckUtils;
 import simplexity.nerffarms.util.Debug;

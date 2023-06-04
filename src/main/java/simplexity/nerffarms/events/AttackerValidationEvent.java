@@ -12,9 +12,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import simplexity.nerffarms.listener.damagehandling.DamageListener;
-import simplexity.nerffarms.util.ConfigToggle;
+import simplexity.nerffarms.config.ConfigToggle;
 import simplexity.nerffarms.util.Debug;
-import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 
 import java.util.Objects;
 
@@ -66,7 +66,11 @@ public class AttackerValidationEvent extends Event implements Cancellable {
     public void populateAttackerEntity() {
         setBukkitAttackingEntity(getEntityDamageByEntityEvent().getDamager());
         setNmsAttackerLivingEntity(getNmsDamagedLivingEntity().getLastAttacker());
+        getNmsAttackerLivingEntity().canAttack()
     }
+
+
+
 
     public double getFinalDamage() {
         return getEntityDamageByEntityEvent().getFinalDamage();

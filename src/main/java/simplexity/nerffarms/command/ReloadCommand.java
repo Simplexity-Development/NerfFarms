@@ -1,9 +1,9 @@
 package simplexity.nerffarms.command;
 
-import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 import simplexity.nerffarms.NerfFarms;
 import simplexity.nerffarms.util.ModType;
-import simplexity.nerffarms.util.Message;
+import simplexity.nerffarms.config.Message;
 import simplexity.nerffarms.util.NFPerm;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;

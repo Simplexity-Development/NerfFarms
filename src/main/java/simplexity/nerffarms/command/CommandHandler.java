@@ -1,7 +1,7 @@
 package simplexity.nerffarms.command;
 
 import simplexity.nerffarms.NerfFarms;
-import simplexity.nerffarms.util.Message;
+import simplexity.nerffarms.config.Message;
 import simplexity.nerffarms.util.NFPerm;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

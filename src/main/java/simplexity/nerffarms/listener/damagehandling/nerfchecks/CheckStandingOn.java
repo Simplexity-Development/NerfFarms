@@ -1,6 +1,6 @@
 package simplexity.nerffarms.listener.damagehandling.nerfchecks;
 
-import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 import simplexity.nerffarms.listener.damagehandling.AddPDCDamage;
 import simplexity.nerffarms.util.Debug;
 import org.bukkit.Location;

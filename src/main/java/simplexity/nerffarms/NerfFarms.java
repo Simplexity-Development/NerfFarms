@@ -1,7 +1,7 @@
 package simplexity.nerffarms;
 
 import simplexity.nerffarms.command.CommandHandler;
-import simplexity.nerffarms.util.NerfFarmsConfig;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 import simplexity.nerffarms.listener.ItemPickupListener;
 import simplexity.nerffarms.listener.damagehandling.DamageListener;
 import simplexity.nerffarms.listener.MobDeathListener;

@@ -1,10 +1,11 @@
-package simplexity.nerffarms.util;
+package simplexity.nerffarms.config;
 
 import simplexity.nerffarms.NerfFarms;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import simplexity.nerffarms.util.ModType;
 
 import java.util.*;
 

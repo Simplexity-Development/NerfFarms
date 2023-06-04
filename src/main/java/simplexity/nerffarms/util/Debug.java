@@ -1,6 +1,7 @@
 package simplexity.nerffarms.util;
 
 import simplexity.nerffarms.NerfFarms;
+import simplexity.nerffarms.config.NerfFarmsConfig;
 
 public class Debug {
     /**

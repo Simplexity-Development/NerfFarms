@@ -1,6 +1,6 @@
 package simplexity.nerffarms.command;
 
-import simplexity.nerffarms.util.Message;
+import simplexity.nerffarms.config.Message;
 import simplexity.nerffarms.util.NFPerm;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
