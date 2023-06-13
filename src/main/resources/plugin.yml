@@ -1,21 +1,7 @@
 name: NerfFarms
 version: '${project.version}'
 main: simplexity.nerffarms.NerfFarms
-api-version: 1.19
+api-version: "1.20"
 author: Rhythmic, Peashooter101
 website: https://github.com/Simplexity-Development/NerfFarms
 description: Allows greater control over farming on your server
-commands:
-  nerffarms:
-    permission: nerffarms.commands
-    description: Base command for nerffarms
-permissions:
-  nerffarms.commands:
-    description: Allows usage of /nerffarms
-    default: op
-  nerffarms.reload:
-    description: Allows user to reload the configuration
-    default: op
-  nerffarms.bypass:
-    description: Allows a user to bypass nerf checks, allowing mobs to drop all xp and loot on death when killed by the player
-    default: op
