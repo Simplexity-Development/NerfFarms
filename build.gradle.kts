@@ -1,14 +1,14 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.5.3"
-    id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
+    id("io.papermc.paperweight.userdev") version "1.5.5"
+    id("xyz.jpenilla.run-paper") version "2.1.0" // Adds runServer and runMojangMappedServer tasks for testing
 }
 
 group = "simplexity"
 version = "0.5.0-dev"
 
 dependencies {
-    paperweight.devBundle("org.purpurmc.purpur", "1.19.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 }
 repositories {
     maven("https://repo.purpurmc.org/snapshots")
@@ -34,10 +34,6 @@ tasks {
         options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
     }
     processResources {
-        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-        filesMatching("plugin.yml") {
-            expand("version" to project.version)
-        }
     }
 }

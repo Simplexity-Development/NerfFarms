@@ -1,5 +1,5 @@
 name: NerfFarms
-version: '0.5.0-dev'
+version: '${project.version}'
 main: simplexity.nerffarms.NerfFarms
 api-version: "1.20"
 author: Rhythmic, Peashooter101
