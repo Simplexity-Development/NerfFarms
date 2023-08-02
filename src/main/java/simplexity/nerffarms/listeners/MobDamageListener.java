@@ -13,12 +13,13 @@ import java.util.List;
 public class MobDamageListener implements Listener {
     
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public boolean onDamageBlacklisted(EntityDamageEvent damageEvent) {
-        if (damageEvent instanceof EntityDamageByEntityEvent) return false;
-        if (!(damageEvent.getEntity() instanceof LivingEntity)) return false;
+    public void onMobDamage(EntityDamageEvent damageEvent) {
+        if (damageEvent instanceof EntityDamageByEntityEvent) return;
+        if (!(damageEvent.getEntity() instanceof LivingEntity)) return;
         EntityDamageEvent.DamageCause damageCause = damageEvent.getCause();
-        List<EntityDamageEvent.DamageCause> damageCauseList = Config.getBlacklistedDamageReasons();
-        return damageCauseList.contains(damageCause);
+        List<EntityDamageEvent.DamageCause> blacklistedDamageReasons = Config.getBlacklistedDamageReasons();
+        if (!blacklistedDamageReasons.contains(damageCause)) return;
+        //TODO Nerf logic
     }
 
 }
