@@ -49,3 +49,7 @@ A target is considered reachable if the attacker can pathfind close enough to at
 
 - Attackers without any ranged attacks must be able to close the distance to the Target.
 - This does not really concern ranged attackers as much, but since ranged attacks have a maximum distance, may be worth looking to if it poses as an issue.
+
+### Environmental Damage
+
+Damage is considered environmental if it is one of the configured blacklisted damage reasons. This should prevent bringing a mob's health down to a level where they can be killed with very little effort
