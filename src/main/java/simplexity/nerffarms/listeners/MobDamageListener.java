@@ -15,16 +15,18 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 public class MobDamageListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onMobDeath(EntityDamageByEntityEvent event) {
+    public void onMobDamage(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) return;
         if (!(event.getEntity() instanceof CraftMob mob)) return;
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
         Mob nmsMob = mob.getHandle();
-        // Basic Checks: Gamemode, Invulnerability, Line of Sight
+
+        // Basic Checks: Gamemode, Targetability, Invulnerability, Line of Sight
         if (nmsMob.canAttack(nmsPlayer, TargetingConditions.forCombat())) {
             player.sendMessage("[canAttack()] Enemy can attack player.");
         }
         else { player.sendMessage("[canAttack()] Enemy cannot attack player."); }
+
         // Melee Damage Distance
         if (canMelee(nmsMob, nmsPlayer)) {
             player.sendMessage("[canMelee()] Enemy can attack player.");
