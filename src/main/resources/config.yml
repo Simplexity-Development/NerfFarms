@@ -1,0 +1,13 @@
+#https://purpurmc.org/javadoc/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+blacklisted-damage-cause:
+  - FALL
+  - FIRE
+  - CRAMMING
+  - FREEZE
+  - HOT_FLOOR
+  - WITHER
+  - LAVA
+  - SUFFOCATION
+  - CONTACT
+  - DROWNING
+  - DRYOUT
